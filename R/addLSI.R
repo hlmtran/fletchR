@@ -24,25 +24,28 @@
 #'
 #' @export
 #'
-addLSI <- function(x, useMatrix=c("TFIDF","counts"), name="LSI", scaleDims=TRUE, corCutOff=0.75, excludeChr=c("chrM","chrX","chrY"), nDimensions=30, depth="nFrags", subsetLSI=TRUE, ...) { 
-
+addLSI <- function(x, metadataSlot="TFIDF", name="LSI", scaleDims=FALSE, corCutOff=1, excludeChr=c("chrM","chrX","chrY"), nDimensions=30, depth="nFrags", seed = 1,...) { 
+  set.seed(seed)
   stopifnot(depth %in% names(colData(x)))
-  useMatrix <- match.arg(useMatrix) 
-  keep <- setdiff(seqlevels(x), excludeChr)
-  if (subsetLSI) {
-    stopifnot("usedForLSI" %in% names(mcols(x)))
-    idx <- which(mcols(x)$usedForLSI)
-  } else {
-    idx <- seq_len(nrow(x))
-  }
-  message("Subsetting TF-IDF matrix...") 
-  mat <- assay(keepSeqlevels(x[idx,], keep, pruning.mode="coarse"), useMatrix)
+  # useMatrix <- match.arg(useMatrix) 
+  # keep <- setdiff(seqlevels(x), excludeChr)
+  # if (subsetLSI) {
+  #   stopifnot("usedForLSI" %in% names(mcols(x)))
+  #   idx <- which(mcols(x)$usedForLSI)
+  # } else {
+  #   idx <- seq_len(nrow(x))
+  # }
+  # message("Subsetting TF-IDF matrix...") 
+  # mat <- assay(keepSeqlevels(x[idx,], keep, pruning.mode="coarse"), useMatrix)
+  # mat <- filterAndGetMat(x=x,useMatrix=useMatrix,excludeChr=excludeChr,subsetLSI=subsetLSI)
+  mat = metadata(x)[[metadataSlot]]
   message("Running SVD...")
-  svd <- irlba::irlba(mat, nDimensions + 5, nDimensions + 5)
-  svdDiag <- matrix(0, nrow=nDimensions + 5, ncol=nDimensions + 5)
-  diag(svdDiag) <- svd$d
-  matSVD <- t(svdDiag %*% t(svd$v))
-  rownames(matSVD) <- colnames(mat)
+  svd <- irlba::irlba(mat[,-match(attr(mat, 'outliers'),colnames(mat))], nDimensions, nDimensions)
+  # svdDiag <- matrix(0, nrow=nDimensions + 5, ncol=nDimensions + 5)
+  # diag(svdDiag) <- svd$d
+  # matSVD <- t(svdDiag %*% t(svd$v))
+  # rownames(matSVD) <- colnames(mat)
+  matSVD = projectSVD(mat,svd$u,svd$d,nDimensions)
   if (scaleDims) {
     # check and see if this is doing it right!
     message("Scaling matSVD...")
@@ -56,5 +59,14 @@ addLSI <- function(x, useMatrix=c("TFIDF","counts"), name="LSI", scaleDims=TRUE,
   reducedDim(x, name) <- matSVD
   message("Done.")
   return(x) 
+}
 
+projectSVD = function(mat,u,d,nDim){
+  V <- Matrix::t(mat) %*% u %*% diag(1/d)
+  svdDiag <- matrix(0,nrow=nDim,ncol=nDim)# D in UDt(V)
+  diag(svdDiag) <- d                                    # as above
+  matSVD <- as.matrix(Matrix::t(svdDiag %*% Matrix::t(V)))      # project mat
+  rownames(matSVD) <- colnames(mat)                             # cell names
+  colnames(matSVD) <- paste0("LSI",seq_len(ncol(matSVD)))       # LSIdim names
+  return(matSVD)     
 }

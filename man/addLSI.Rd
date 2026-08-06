@@ -6,21 +6,19 @@
 \usage{
 addLSI(
   x,
-  useMatrix = c("TFIDF", "counts"),
+  metadataSlot = "TFIDF",
   name = "LSI",
-  scaleDims = TRUE,
-  corCutOff = 0.75,
+  scaleDims = FALSE,
+  corCutOff = 1,
   excludeChr = c("chrM", "chrX", "chrY"),
   nDimensions = 30,
   depth = "nFrags",
-  subsetLSI = TRUE,
+  seed = 1,
   ...
 )
 }
 \arguments{
 \item{x}{a SingleCellExperiment, usually from archRtoSCE}
-
-\item{useMatrix}{name of assay to use ("TFIDF")}
 
 \item{name}{name of reducedDim to store the LSI embedding ("LSI")}
 
@@ -33,6 +31,8 @@ addLSI(
 \item{nDimensions}{number of dimensions for the SVD (30)}
 
 \item{depth}{colData column holding depth for correlations ('nFrags')}
+
+\item{useMatrix}{name of assay to use ("TFIDF")}
 
 \item{subsetLSI}{subset to mcols(x)$usedForLSI? (TRUE)}
 }

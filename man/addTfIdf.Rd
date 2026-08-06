@@ -2,31 +2,65 @@
 % Please edit documentation in R/addTfIdf.R
 \name{addTfIdf}
 \alias{addTfIdf}
-\title{add ArchR-style log1p(TF-IDF) transformed counts matrix to assays(x, 'TFIDF')}
+\title{Add an ArchR-style log1p(TF-IDF) matrix to metadata}
 \usage{
-addTfIdf(x, idf = NULL, ...)
+addTfIdf(
+  x,
+  useMatrix = c("counts", "TileMatrix"),
+  excludeChr = c("chrM", "chrX", "chrY"),
+  subsetLSI = TRUE,
+  binarize = TRUE,
+  outlierQuantiles = c(0.02, 0.98),
+  prune = 1,
+  metadataSlot = "TFIDF",
+  ...
+)
 }
 \arguments{
-\item{x}{a SummarizedExperiment}
+\item{x}{A \code{SummarizedExperiment}.}
 
-\item{idf}{a pre-trained idf or logTfIdf result (NULL; compute idf)}
+\item{useMatrix}{name of assay to use ("TFIDF")}
 
-\item{...}{additional arguments passed to logTfIdf()}
+\item{excludeChr}{chroms to exclude by default (chrM, chrX, chrY)}
+
+\item{subsetLSI}{Logical indicating whether only features selected for latent
+semantic indexing (LSI) should be used.}
+
+\item{binarize}{Binarize matrix}
+
+\item{outlierQuantiles}{Numeric vector of length two specifying the lower and
+upper quantiles used to identify outlier cells by total accessibility. Set
+to \code{NULL} to disable outlier detection.}
+
+\item{prune}{Minimum number of non-outlier cells in which a feature must be
+observed to be retained.}
+
+\item{...}{Additional arguments passed to \code{logTFIDF()}.}
+
+\item{metadataName}{Character scalar giving the name under which the
+transformed matrix is stored in \code{metadata(x)}.}
 }
 \value{
-\if{html}{\out{<div class="sourceCode">}}\preformatted{     x, but with a TFIDF matrix added to assays(x)
-}\if{html}{\out{</div>}}
+The input \code{SummarizedExperiment} with a log-transformed TF-IDF
+matrix stored in \code{metadata(x)[[metadataName]]}. The stored matrix has
+attributes \code{"idf"} containing the computed inverse document
+frequencies and \code{"outliers"} containing the names of cells excluded
+from IDF estimation.
 }
 \description{
-add ArchR-style log1p(TF-IDF) transformed counts matrix to assays(x, 'TFIDF')
+Computes an ArchR-style log-transformed term frequency-inverse document
+frequency (TF-IDF) matrix from a sparse count matrix stored in a
+\code{SummarizedExperiment}. The transformed matrix is stored in
+\code{metadata(x)} together with attributes containing the computed inverse
+document frequencies (IDF) and the names of outlier cells.
 }
 \details{
-\if{html}{\out{<div class="sourceCode">}}\preformatted{    the 'idf' parameter for logTfIdf() is of interest, as
-             it will be propagated into metadata(x)$idf and can be
-             passed in to addTfIdf as well (e.g. if projecting data)
-}\if{html}{\out{</div>}}
+Outlier cells are excluded when estimating inverse document
+frequencies but remain in the transformed matrix. Features observed in
+fewer than \code{prune} non-outlier cells are omitted from the stored
+TF-IDF matrix. The input \code{SummarizedExperiment} is not subsetted or
+otherwise modified apart from the addition of the metadata entry.
 }
 \seealso{
-\if{html}{\out{<div class="sourceCode">}}\preformatted{    logTfIdf
-}\if{html}{\out{</div>}}
+\code{\link{logTFIDF}}, \code{\link{TF}}, \code{\link{IDF}}
 }

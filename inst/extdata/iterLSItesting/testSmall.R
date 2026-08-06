@@ -12,7 +12,7 @@ proj <- addIterativeLSI(proj, dimsToUse=1:5, varFeatures=1000, force=TRUE)
 # `sampleCellsPre` disabled
 # `testBias` in `addClusters` disabled
 #
-proj <- addTileMatrix(proj) 
+# proj <- addTileMatrix(proj) 
 SEsmall <- ArchR::getMatrixFromProject(proj, "TileMatrix", binarize=TRUE)
 
 # convert to SCE so that we can use ReducedDims
@@ -62,25 +62,107 @@ SCEsmall <- addTfIdf(SCEsmall, prune=1)
 res <- try(addLSI(SCEsmall))
 
 if (!inherits(res, "try-error")) {
-  subsample <- sample(colnames(SCEsmall), 100)
-  toProject <- assay(SCEsmall)[, subsample]
+  # subsample <- sample(colnames(SCEsmall), 100)
+  # toProject <- assay(SCEsmall)[, subsample]
+  # LSI <- metadata(SCEsmall)$LSI
+  # projectedMatSVD <- archRiSEE::projectLSI(toProject, LSI)
+  # # Subsetting TF-IDF matrix...
+  # # Running SVD...
+  # # Warning in irlba::irlba(mat, nDimensions + 5, nDimensions + 5) :
+  # #   convergence criterion below machine epsilon
+  # # Warning in irlba::irlba(mat, nDimensions + 5, nDimensions + 5) :
+  # #   did not converge--results might be invalid!; try increasing work or maxit
+  # # Scaling matSVD...
+  # # Checking for depth-correlated columns...
+  # # Kept 0% of columns.
+  # # Error in matSVD[, toKeep][, seq_len(nDimensions)] : 
+  # #   subscript out of bounds
+  # testError <- projectedMatSVD - LSI$matSVD[subsample, ] 
+  
   LSI <- metadata(SCEsmall)$LSI
-  projectedMatSVD <- archRiSEE::projectLSI(toProject, LSI)
-  # Subsetting TF-IDF matrix...
-  # Running SVD...
-  # Warning in irlba::irlba(mat, nDimensions + 5, nDimensions + 5) :
-  #   convergence criterion below machine epsilon
-  # Warning in irlba::irlba(mat, nDimensions + 5, nDimensions + 5) :
-  #   did not converge--results might be invalid!; try increasing work or maxit
-  # Scaling matSVD...
-  # Checking for depth-correlated columns...
-  # Kept 0% of columns.
-  # Error in matSVD[, toKeep][, seq_len(nDimensions)] : 
-  #   subscript out of bounds
-  testError <- projectedMatSVD - LSI$matSVD[subsample, ] 
+  toProject <- assay(SCEsmall)[match(names(LSIgr), rownames(SCEsmall)),,drop = FALSE]
+  toProject_minus_outliers = toProject[,-match(LSI$outliers,colnames(toProject))]
+  # 
+  # identical(LSI$LSIFeatures,featureDF_iter2)
+  # identical(LSI$idx,LSI_iter2$idx)
+  # identical(colnames(toProject),colnames(mat_iter2_computeLSI))
+  # 
+  # all.equal(
+  #   as.matrix(toProject),
+  #   as.matrix(mat_iter2_computeLSI),
+  #   check.attributes = FALSE
+  # )
+  # 
+  projectedMatSVD <- archRiSEE::projectLSI(toProject_minus_outliers, LSI)
+  
+  identical(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),])
+  # testCorrelation(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),])
+  
+  cor(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),]) |> diag()
+  plot(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),])
 }
 
-# test stacking with LSI mapping 
+###
+SCEsmall2 = SCEsmall
+SCEsmall2 <- addTfIdf(SCEsmall2, prune=1,useMatrix = "TileMatrix",subsetLSI = TRUE,outlierQuantiles = c(0,1))
+
+tfidf_n = SCEsmall2@metadata[["TFIDF"]]
+
+identical(tfidf_n[,colnames(logTFIDF_iter2)]@x,logTFIDF_iter2@x)
+plot(tfidf_n[,colnames(logTFIDF_iter2)]@x,logTFIDF_iter2@x)
+cor(tfidf_n[,colnames(logTFIDF_iter2)]@x,logTFIDF_iter2@x)
+
+SCEsmall2 = addLSI(SCEsmall2,scaleDims = FALSE,nDimensions = 5,corCutOff = 1)
+pmSVD = reducedDim(SCEsmall2,"LSI")
+cor(pmSVD,LSI$matSVD)
 
 
-# test projecting on stacked data
+
+# #######
+# test_mat = toProject
+# #test outlier
+# idxOutliers = outlierByQuantile(toProject,c(0,1))
+# identical(colnames(toProject)[idxOutliers],LSI$outliers)
+# 
+# 
+# #test log(TFIDF)
+# toProject_minus_outliers_minus0Row = remove0Rows(toProject_minus_outliers)
+# tfidf_test = logTfIdf(
+#   toProject_minus_outliers_minus0Row,
+#   idf = calcIDF(toProject_minus_outliers_minus0Row)
+#   )
+# 
+# dim(tfidf_test)
+# dim(logTFIDF_iter2)
+# 
+# all.equal(
+#   tfidf_test |> as.matrix(),
+#   logTFIDF_iter2 |> as.matrix()
+#   )
+# cor(
+#   tfidf_test |> as.matrix(),
+#   logTFIDF_iter2 |> as.matrix()
+# ) |> diag()
+# 
+# tfidf_test2 = logTfIdf(
+#   toProject_minus_outliers
+# )
+# cor(
+#   tfidf_test2 |> as.matrix(),
+#   logTFIDF_iter2 |> as.matrix()
+# ) |> diag()
+# plot(
+#   tfidf_test2@x,
+#   logTFIDF_iter2@x
+# )
+# 
+# # test stacking with LSI mapping 
+# 
+# 
+# # test projecting on stacked data
+# 
+# all.equal(
+#   as.matrix(toProject),
+#   as.matrix(mat_iter2_computeLSI),
+#   check.attributes = FALSE
+# )

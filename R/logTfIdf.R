@@ -26,7 +26,7 @@ logTfIdf <- function(mat, prune=1, idf=NULL, binarize=TRUE) {
   if (is(idf, "sparseMatrix")) idf <- attr(idf, 'idf') 
   if (!is(mat, "sparseMatrix")) stop("logTfIdf only works on sparse matrices") 
   if (binarize) mat <- binarizeMat(mat)
-  origrows <- rownames(mat)
+  origRows <- rownames(mat)
 
   # directly borrowed from ArchR
   colSm <- Matrix::colSums(mat)
@@ -47,23 +47,26 @@ logTfIdf <- function(mat, prune=1, idf=NULL, binarize=TRUE) {
     if (sum(toPrune) > 0) {
       message("Minimum observed feature frequency: ", min(rowSm2[rowSm2 > 0]))
       message("Minimum allowable feature frequency: ", prune)
-      message("Zeroing out ",sum(toPrune)," of ",length(toPrune)," features.")
-      keep <- as(Matrix::Diagonal(x=!toPrune), "sparseMatrix")
-      rownames(keep) <- rownames(mat) 
-      mat <- keep %*% mat
+      message("Removing ",sum(toPrune)," of ",length(toPrune)," features.")
+      # keep <- as(Matrix::Diagonal(x=!toPrune), "sparseMatrix")
+      # rownames(keep) <- rownames(mat) 
+      # mat <- keep %*% mat
+      mat = mat[!toPrune,]
+      origRows = origRows[!toPrune]
       rowSm2 <- rowSums(mat > 0)
       message("Minimum feature frequency is ", min(rowSm2[rowSm2 > 0]),
-              " (", sum(keep), "/", length(toPrune), " features retained).")
+              " (", sum(!toPrune), "/", length(toPrune), " features retained).")
     }
     message("Computing IDF (inverse document frequency) table... ", appendLF=0)
-    idf <- as(((ncol(mat)+1)/(rowSm2+1)) + 1, "sparseVector")
+    # idf <- as(((ncol(mat)+1)/(rowSm2+1)) + 1, "sparseVector")
+    idf = as(ncol(mat)/(rowSm2), "sparseVector")
     attr(idf, 'names') <- rownames(mat)
     message("done.")
   }
   mat <- as(Matrix::Diagonal(x=as.vector(idf)), "sparseMatrix") %*% mat
   message("Computing log1p(TF-IDF)... ", appendLF=FALSE)
   mat@x <- log(mat@x * 10001)
-  rownames(mat) <- origrows
+  rownames(mat) <- origRows
   attr(mat, 'idf') <- idf
   message("done.")
   return(mat)
