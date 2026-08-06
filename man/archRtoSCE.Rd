@@ -4,34 +4,12 @@
 \alias{archRtoSCE}
 \title{turn an ArchR project into a SingleCellExperiment}
 \usage{
-archRtoSCE(
-  proj,
-  how = c("tiles", "feats", "LSI"),
-  feats = NULL,
-  addNMF = FALSE,
-  colDat = FALSE,
-  LSIdim = "IterativeLSI",
-  tileSize = NULL,
-  keepbinary = FALSE,
-  ...
-)
+archRtoSCE(proj, keepbinary = FALSE, ...)
 }
 \arguments{
 \item{proj}{an ArchRproject}
 
-\item{how}{where to get counts from ('tiles','feats','LSI')}
-
-\item{feats}{GRanges of features to extract (ideally 500bp; NULL)}
-
-\item{addNMF}{add an NMF decomposition of logCounts? (FALSE)}
-
-\item{colDat}{add LSI and/or NMF scores to colData(SCE)? (FALSE)}
-
-\item{LSIdim}{name of IterativeLSI reducedDim ("IterativeLSI")}
-
-\item{tileSize}{tileSize (default is whatever is in use)}
-
-\item{keepbinary}{keep tiles binarized if they are already? (FALSE)}
+\item{keepbinary}{keep tiles binarized if they are already? (TRUE)}
 
 \item{...}{additional arguments for ArchR::getMatrixFromProject()}
 }
@@ -43,13 +21,10 @@ archRtoSCE(
 turn an ArchR project into a SingleCellExperiment
 }
 \details{
-Presumes LSI and UMAP. you will almost certainly want to tweak this.
-If !is.null(feats), (GRanges, please!) we assume that how == "feats"
+Presumes LSI has been done (this will likely be relaxed soon).
 If you are working with single-cell histone or transcription factor
 data, you will most likely want to use larger (5kb-50kb) tiles (see
 Janssens et al, Nature Protocols, 2024 for sciCUT&Tag benchmarks).
-This function has changed recently (2026) and the assumption is
-that most users will want a subset of features. Pay attention to
-any warning messages -- they can save you a lot of time and RAM!
-This function is way too big nowadays and should be refactored.
+Recent (2026) versions of this function simply cram a lot of ArchR
+outputs into metadata()$output for simplicity.
 }

@@ -80,8 +80,8 @@ if (!inherits(res, "try-error")) {
   # testError <- projectedMatSVD - LSI$matSVD[subsample, ] 
   
   LSI <- metadata(SCEsmall)$LSI
-  toProject <- assay(SCEsmall)[match(names(LSIgr), rownames(SCEsmall)),,drop = FALSE]
-  toProject_minus_outliers = toProject[,-match(LSI$outliers,colnames(toProject))]
+  toProject <- assay(SCEsmall)[match(names(LSIgr),rownames(SCEsmall)),,drop=F]
+  toProject_minus_outliers=toProject[,-match(LSI$outliers,colnames(toProject))]
   # 
   # identical(LSI$LSIFeatures,featureDF_iter2)
   # identical(LSI$idx,LSI_iter2$idx)
