@@ -7,7 +7,7 @@
 #' document frequencies (IDF) and the names of outlier cells.
 #'
 #' @param x A \code{SummarizedExperiment}.
-#' @param useMatrix name of assay to use ("TFIDF") 
+#' @param useMatrix name of assay to use ("counts") 
 #' @param excludeChr chroms to exclude by default (chrM, chrX, chrY) 
 #' @param subsetLSI Logical indicating whether only features selected for latent
 #'   semantic indexing (LSI) should be used.
@@ -36,11 +36,13 @@
 #' @seealso \code{\link{logTFIDF}}, \code{\link{TF}}, \code{\link{IDF}}
 #'
 #' @import SummarizedExperiment
+#' @import GenomeInfoDb
 #'
 #' @export
 addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM","chrX","chrY"), subsetLSI=TRUE, binarize=TRUE, outlierQuantiles=c(0.02, 0.98), prune=1, metadataSlot="TFIDF", ...) { 
 
   if (is(x, "SummarizedExperiment")) {
+    useMatrix <- match.arg(useMatrix)
     mat <- filterAndGetMat(x=x, useMatrix=useMatrix, excludeChr=excludeChr, 
                            subsetLSI=subsetLSI)
   }
@@ -63,11 +65,9 @@ addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM",
   
   mat <- getTF(mat[keep,])
   idfMat <- getIDF(idfMat[keep,])
+  message("Adding ", metadataSlot, " to metadata(x)$", metadataSlot, "...")
   metadata(x)[[metadataSlot]] <- logTFIDF(tf=mat,idf=idfMat , ...)
-  
   attr(metadata(x)[[metadataSlot]], 'idf') <- idfMat
   attr(metadata(x)[[metadataSlot]], 'outliers') <- outliers
-  message("Adding idf to metadata(x)$idf...")
-  # metadata(x)$idf <- attr(assay(x, metadataName), 'idf')
   return(x)
 }

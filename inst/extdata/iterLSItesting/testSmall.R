@@ -166,3 +166,8 @@ cor(pmSVD,LSI$matSVD)
 #   as.matrix(mat_iter2_computeLSI),
 #   check.attributes = FALSE
 # )
+
+
+# now try the actual archRiSEE function 
+SCE <- archRtoSCE(proj) 
+

@@ -19,7 +19,7 @@ addTfIdf(
 \arguments{
 \item{x}{A \code{SummarizedExperiment}.}
 
-\item{useMatrix}{name of assay to use ("TFIDF")}
+\item{useMatrix}{name of assay to use ("counts")}
 
 \item{excludeChr}{chroms to exclude by default (chrM, chrX, chrY)}
 

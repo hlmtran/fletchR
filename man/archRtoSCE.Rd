@@ -4,12 +4,10 @@
 \alias{archRtoSCE}
 \title{turn an ArchR project into a SingleCellExperiment}
 \usage{
-archRtoSCE(proj, keepbinary = FALSE, ...)
+archRtoSCE(proj, ...)
 }
 \arguments{
 \item{proj}{an ArchRproject}
-
-\item{keepbinary}{keep tiles binarized if they are already? (TRUE)}
 
 \item{...}{additional arguments for ArchR::getMatrixFromProject()}
 }

@@ -21,6 +21,7 @@ filterAndGetMat <- function(
     excludeChr = c("chrM", "chrX", "chrY"),
     subsetLSI = TRUE
 ) {
+
   keep <- setdiff(seqlevels(x), excludeChr)
   if (subsetLSI) {
     stopifnot("usedForLSI" %in% names(mcols(x)))
@@ -28,7 +29,9 @@ filterAndGetMat <- function(
   } else {
     idx <- seq_len(nrow(x))
   }
-  message("Subsetting assay matrix...")
-  mat = assay(keepSeqlevels(x[idx, ],keep,pruning.mode = "coarse"),useMatrix)
+  useMatrix <- match.arg(useMatrix)
+  message("Subsetting assay matrix ", useMatrix, "...")
+  mat <- assay(keepSeqlevels(x[idx, ], keep, pruning.mode = "coarse"),
+               useMatrix)
   return(mat)
 }
