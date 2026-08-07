@@ -1,8 +1,8 @@
-# archRiSEE
+# fletchR
 
 Turns ArchR projects into iSEE-able SingleCellExperiments.  Also allows some control over dimension reduction (i.e. improvements on iterative LSI). 
 
-[![Build Status](https://travis-ci.org/ttriche/archRiSEE.png?branch=master)](https://travis-ci.org/ttriche/archRiSEE)  [![codecov](https://codecov.io/gh/ttriche/archRiSEE/branch/master/graph/badge.svg)](https://codecov.io/gh/ttriche/archRiSEE)
+[![Build Status](https://travis-ci.org/ttriche/fletchR.png?branch=master)](https://travis-ci.org/ttriche/fletchR)  [![codecov](https://codecov.io/gh/ttriche/fletchR/branch/master/graph/badge.svg)](https://codecov.io/gh/ttriche/fletchR)
 
 
 ## Installing
@@ -10,7 +10,7 @@ Turns ArchR projects into iSEE-able SingleCellExperiments.  Also allows some con
 The devel version of the package can be pulled from GitHub with BiocManager:
 
     # install.packages(c("BiocManager", "remotes"))
-    BiocManager::install("trichelab/fletcheR", build_vignettes=TRUE)
+    BiocManager::install("trichelab/fletchR", build_vignettes=TRUE)
 
 ## Using it
 
@@ -18,7 +18,7 @@ The core of the package:
 
     # convert an ArchR project
     library(archR)
-    library(fletcheR)
+    library(fletchR)
     proj <- getTestProject()
     proj <- addIterativeLSI(proj, dimsToUse=1:5, varFeatures=1000, force=TRUE)
     SCE <- archRtoSCE(proj) 
