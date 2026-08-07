@@ -1,4 +1,4 @@
-Package: archRiSEE
+Package: fletcheR
 Type: Package
 Title: convert ArchR projects into SingleCellExperiments, and add some niceties
 Description: ArchR is a glorious package for single-cell chromatin analysis, but
@@ -9,8 +9,8 @@ Description: ArchR is a glorious package for single-cell chromatin analysis, but
              becomes quite intuitive. archRiSEE bolts together the components 
              along with some NMF-related niceties for rapid iteration of 
              collaborative explorations, as when spitballing figures or for QC.
-Version: 0.8.14
-Date: 2026-08-06
+Version: 0.8.15
+Date: 2026-08-07
 Authors@R: c(person("Tim", "Triche, Jr.", 
                     role=c("aut", "cre"), 
                     email="trichelab@gmail.com"),
