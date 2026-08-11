@@ -1,4 +1,4 @@
-library(archRiSEE)
+library(fletchR)
 
 # test project
 library(ArchR)
@@ -95,26 +95,26 @@ if (!inherits(res, "try-error")) {
   # 
   projectedMatSVD <- archRiSEE::projectLSI(toProject_minus_outliers, LSI)
   
-  identical(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),])
+  # identical(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),])
   # testCorrelation(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),])
   
   cor(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),]) |> diag()
   plot(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),])
 }
 
-###
-SCEsmall2 = SCEsmall
-SCEsmall2 <- addTfIdf(SCEsmall2, prune=1,useMatrix = "TileMatrix",subsetLSI = TRUE,outlierQuantiles = c(0,1))
-
-tfidf_n = SCEsmall2@metadata[["TFIDF"]]
-
-identical(tfidf_n[,colnames(logTFIDF_iter2)]@x,logTFIDF_iter2@x)
-plot(tfidf_n[,colnames(logTFIDF_iter2)]@x,logTFIDF_iter2@x)
-cor(tfidf_n[,colnames(logTFIDF_iter2)]@x,logTFIDF_iter2@x)
-
-SCEsmall2 = addLSI(SCEsmall2,scaleDims = FALSE,nDimensions = 5,corCutOff = 1)
-pmSVD = reducedDim(SCEsmall2,"LSI")
-cor(pmSVD,LSI$matSVD)
+###testing tfidf internals
+# SCEsmall2 = SCEsmall
+# SCEsmall2 <- addTfIdf(SCEsmall2, prune=1,useMatrix = "TileMatrix",subsetLSI = TRUE,outlierQuantiles = c(0,1))
+# 
+# tfidf_n = SCEsmall2@metadata[["TFIDF"]]
+# 
+# identical(tfidf_n[,colnames(logTFIDF_iter2)]@x,logTFIDF_iter2@x)
+# plot(tfidf_n[,colnames(logTFIDF_iter2)]@x,logTFIDF_iter2@x)
+# cor(tfidf_n[,colnames(logTFIDF_iter2)]@x,logTFIDF_iter2@x)
+# 
+# SCEsmall2 = addLSI(SCEsmall2,scaleDims = FALSE,nDimensions = 5,corCutOff = 1)
+# pmSVD = reducedDim(SCEsmall2,"LSI")
+# cor(pmSVD,LSI$matSVD)
 
 
 
@@ -169,5 +169,31 @@ cor(pmSVD,LSI$matSVD)
 
 
 # now try the actual archRiSEE function 
-SCE <- archRtoSCE(proj) 
+
+col_test <- matrix(
+  c(
+    1, 0, 0,
+    1, 1, 0,
+    1, 1, 1
+  ),
+  nrow = 3
+)
+col_test
+
+testthat::expect_equal(
+  pruneCols(col_test, prune = 2),
+  c(TRUE, FALSE, FALSE)
+)
+
+SCE <- archRtoSCE(proj)
+SCE <- addTfIdf(SCE, prune=1,subsetLSI = FALSE,outlierQuantiles = c(0,1),metadataSlot = "noFiltTfIdf")
+identical(rownames(tfidf_n),rownames(SCE@metadata$ArchRTfIdf))
+SCE = addLSI(SCE,metadataSlot = "ArchRTfIdf",scaleDims = FALSE,nDimensions = 5,corCutOff = 0.75)
+cor(reducedDim(SCE,"LSI"),SCE@metadata$LSI$matSVD) |> diag() |> all()
+cor(reducedDim(SCE,"LSI"),SCE@metadata$LSI$matSVD)
+
+sum(getArchRLSIFeatures(SCE) %in% rownames(SCE@metadata$ArchRTfIdf)) == length(rownames(SCE@metadata$ArchRTfIdf))
+
+SCE = addLSI(SCE,metadataSlot = "noFiltTfIdf",features = getArchRLSIFeatures(SCE),scaleDims = FALSE,nDimensions = 5,corCutOff = 0.75)
+
 

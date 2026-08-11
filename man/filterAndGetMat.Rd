@@ -8,7 +8,7 @@ filterAndGetMat(
   x,
   useMatrix = c("TFIDF", "counts", "TileMatrix"),
   excludeChr = c("chrM", "chrX", "chrY"),
-  subsetLSI = TRUE
+  subsetLSI = FALSE
 )
 }
 \arguments{
@@ -18,7 +18,7 @@ filterAndGetMat(
 
 \item{excludeChr}{chroms to exclude by default (chrM, chrX, chrY)}
 
-\item{subsetLSI}{subset to mcols(x)$usedForLSI? (TRUE)}
+\item{subsetLSI}{subset to mcols(x)$usedForLSI? (FALSE)}
 }
 \value{
 \if{html}{\out{<div class="sourceCode">}}\preformatted{         filtered assay matrix

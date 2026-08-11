@@ -6,6 +6,7 @@
 #' @param scaleDims     Z-scale the dimensions? (TRUE)
 #' @param corCutOff     drop dimensions where cor(LSIdim, nFrag) > corCutOff
 #' @param excludeChr    chroms to exclude by default (chrM, chrX, chrY) 
+#' @param features      Features to keep for LSI
 #' @param nDimensions   number of dimensions for the SVD (30) 
 #' @param depth         colData column holding depth for correlations ('nFrags')
 #' @param subsetLSI     subset to mcols(x)$usedForLSI? (TRUE) 
@@ -24,7 +25,7 @@
 #'
 #' @export
 #'
-addLSI <- function(x, metadataSlot="TFIDF", name="LSI", scaleDims=FALSE, corCutOff=1, excludeChr=c("chrM","chrX","chrY"), nDimensions=30, depth="nFrags", seed = 1,...) { 
+addLSI <- function(x, metadataSlot="TFIDF", name="LSI", scaleDims=FALSE, corCutOff=0.75, excludeChr=c("chrM","chrX","chrY"), features=NULL ,nDimensions=30, depth="nFrags", seed = 1,...) { 
   set.seed(seed)
   stopifnot(depth %in% names(colData(x)))
   # useMatrix <- match.arg(useMatrix) 
@@ -39,8 +40,12 @@ addLSI <- function(x, metadataSlot="TFIDF", name="LSI", scaleDims=FALSE, corCutO
   # mat <- assay(keepSeqlevels(x[idx,], keep, pruning.mode="coarse"), useMatrix)
   # mat <- filterAndGetMat(x=x,useMatrix=useMatrix,excludeChr=excludeChr,subsetLSI=subsetLSI)
   mat = metadata(x)[[metadataSlot]]
+  if(!is.null(features)){
+    mat = mat[rownames(mat) %in% features,]
+    }
   message("Running SVD...")
-  svd <- irlba::irlba(mat[,-match(attr(mat, 'outliers'),colnames(mat))], nDimensions, nDimensions)
+  outliers = colnames(mat) %in% attr(mat, 'outliers')
+  svd <- irlba::irlba(mat[,!outliers], nDimensions, nDimensions)
   # svdDiag <- matrix(0, nrow=nDimensions + 5, ncol=nDimensions + 5)
   # diag(svdDiag) <- svd$d
   # matSVD <- t(svdDiag %*% t(svd$v))

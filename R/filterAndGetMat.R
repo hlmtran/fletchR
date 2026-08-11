@@ -3,7 +3,7 @@
 #' @param x             a SingleCellExperiment, usually from archRtoSCE
 #' @param useMatrix     name of assay to use ("TFIDF")
 #' @param excludeChr    chroms to exclude by default (chrM, chrX, chrY)
-#' @param subsetLSI     subset to mcols(x)$usedForLSI? (TRUE)
+#' @param subsetLSI     subset to mcols(x)$usedForLSI? (FALSE)
 #'
 #' @return              filtered assay matrix
 #'
@@ -19,7 +19,7 @@ filterAndGetMat <- function(
     x,
     useMatrix = c("TFIDF","counts","TileMatrix"),
     excludeChr = c("chrM", "chrX", "chrY"),
-    subsetLSI = TRUE
+    subsetLSI = FALSE
 ) {
 
   keep <- setdiff(seqlevels(x), excludeChr)
