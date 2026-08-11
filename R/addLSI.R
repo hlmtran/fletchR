@@ -5,7 +5,6 @@
 #' @param name          name of reducedDim to store the LSI embedding ("LSI") 
 #' @param scaleDims     Z-scale the dimensions? (TRUE)
 #' @param corCutOff     drop dimensions where cor(LSIdim, nFrag) > corCutOff
-#' @param excludeChr    chroms to exclude by default (chrM, chrX, chrY) 
 #' @param features      Features to keep for LSI
 #' @param nDimensions   number of dimensions for the SVD (30) 
 #' @param depth         colData column holding depth for correlations ('nFrags')
@@ -25,7 +24,7 @@
 #'
 #' @export
 #'
-addLSI <- function(x, metadataSlot="TFIDF", name="LSI", scaleDims=FALSE, corCutOff=0.75, excludeChr=c("chrM","chrX","chrY"), features=NULL ,nDimensions=30, depth="nFrags", seed = 1,...) { 
+addLSI <- function(x, metadataSlot="TfIdf", name="LSI", scaleDims=FALSE, corCutOff=0.75, features=NULL ,nDimensions=30, depth="nFrags", seed = 1,...) { 
   set.seed(seed)
   stopifnot(depth %in% names(colData(x)))
   # useMatrix <- match.arg(useMatrix) 
