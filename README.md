@@ -17,8 +17,8 @@ The devel version of the package can be pulled from GitHub with BiocManager:
 The core of the package: 
 
     # convert an ArchR project
-    library(archR)
-    library(fletchR)
+    library(ArchR)
+    library(fletcheR)
     proj <- getTestProject()
     proj <- addIterativeLSI(proj, dimsToUse=1:5, varFeatures=1000, force=TRUE)
     SCE <- archRtoSCE(proj) 
