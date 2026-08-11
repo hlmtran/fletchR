@@ -9,8 +9,9 @@ addLSI(
   metadataSlot = "TFIDF",
   name = "LSI",
   scaleDims = FALSE,
-  corCutOff = 1,
+  corCutOff = 0.75,
   excludeChr = c("chrM", "chrX", "chrY"),
+  features = NULL,
   nDimensions = 30,
   depth = "nFrags",
   seed = 1,
@@ -27,6 +28,8 @@ addLSI(
 \item{corCutOff}{drop dimensions where cor(LSIdim, nFrag) > corCutOff}
 
 \item{excludeChr}{chroms to exclude by default (chrM, chrX, chrY)}
+
+\item{features}{Features to keep for LSI}
 
 \item{nDimensions}{number of dimensions for the SVD (30)}
 

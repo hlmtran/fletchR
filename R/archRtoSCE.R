@@ -99,6 +99,9 @@ archRtoSCE <- function(proj, ...){
 
   message("Copying cellColData...")
   colData(SCE) <- getCellColData(proj)
+  if("usedForLSI" %in% names(rowData(SCE))){
+    SCE <- addTfIdf(SCE, prune=1,subsetLSI = TRUE,outlierQuantiles = c(0,1),metadataSlot = "ArchRTfIdf")
+    }
   SCE <- addTfIdf(SCE, prune=1)
   
   message("Copying metadata...")
