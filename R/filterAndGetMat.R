@@ -29,7 +29,7 @@ filterAndGetMat <- function(
   } else {
     idx <- seq_len(nrow(x))
   }
-  useMatrix <- match.arg(useMatrix)
+  # useMatrix <- match.arg(useMatrix)
   message("Subsetting assay matrix ", useMatrix, "...")
   mat <- assay(keepSeqlevels(x[idx, ], keep, pruning.mode = "coarse"),
                useMatrix)
