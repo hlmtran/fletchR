@@ -42,7 +42,7 @@
 addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM","chrX","chrY"), subsetLSI=FALSE, binarize=TRUE, outlierQuantiles=c(0.02, 0.98), prune=1, metadataSlot="TfIdf", ...) { 
 
   if (is(x, "SummarizedExperiment")) {
-    useMatrix <- match.arg(useMatrix)
+    # useMatrix <- match.arg(useMatrix)
     mat <- filterAndGetMat(x=x, useMatrix=useMatrix, excludeChr=excludeChr, 
                            subsetLSI=subsetLSI)
   }
