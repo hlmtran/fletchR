@@ -187,7 +187,7 @@ testthat::expect_equal(
 
 SCE <- archRtoSCE(proj)
 SCE <- addTfIdf(SCE, prune=1,subsetLSI = FALSE,outlierQuantiles = c(0,1),metadataSlot = "noFiltTfIdf")
-identical(rownames(tfidf_n),rownames(SCE@metadata$ArchRTfIdf))
+# identical(rownames(tfidf_n),rownames(SCE@metadata$ArchRTfIdf))
 SCE = addLSI(SCE,metadataSlot = "ArchRTfIdf",scaleDims = FALSE,nDimensions = 5,corCutOff = 0.75)
 cor(reducedDim(SCE,"LSI"),SCE@metadata$LSI$matSVD) |> diag() |> all()
 cor(reducedDim(SCE,"LSI"),SCE@metadata$LSI$matSVD)

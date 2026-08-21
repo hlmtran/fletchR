@@ -17,8 +17,9 @@
 #'   to \code{NULL} to disable outlier detection.
 #' @param prune Minimum number of non-outlier cells in which a feature must be
 #'   observed to be retained.
-#' @param metadataName Character scalar giving the name under which the
+#' @param metadataSlot Character scalar giving the name under which the
 #'   transformed matrix is stored in \code{metadata(x)}.
+#' @param keep0col Logical indicating to keep columns with colSum = 0
 #' @param ... Additional arguments passed to \code{logTFIDF()}.
 #'
 #' @return The input \code{SummarizedExperiment} with a log-transformed TF-IDF
@@ -39,7 +40,7 @@
 #' @import GenomeInfoDb
 #'
 #' @export
-addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM","chrX","chrY"), subsetLSI=FALSE, binarize=TRUE, outlierQuantiles=c(0.02, 0.98), prune=1, metadataSlot="TfIdf", ...) { 
+addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM","chrX","chrY"), subsetLSI=FALSE, binarize=TRUE, outlierQuantiles=c(0.02, 0.98), prune=1, metadataSlot="TfIdf", keep0col=FALSE,  ...) { 
 
   if (is(x, "SummarizedExperiment")) {
     # useMatrix <- match.arg(useMatrix)
@@ -53,7 +54,9 @@ addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM",
   if (binarize) mat <- binarizeMat(mat)
   
   #remove 0 accessibility cells
-  mat = mat[,!pruneCols(mat,prune=1)]
+  if(!keep0col){
+      mat = mat[,!pruneCols(mat,prune=1)]
+    }
   
   if (!is.null(outlierQuantiles)){
     idxOutliers <- outlierByQuantile(mat,outlierQuantiles)
@@ -66,7 +69,7 @@ addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM",
   idfMat <- mat[, !idxOutliers, drop = FALSE]
   keep <- !pruneRows(idfMat, prune)
   
-  mat <- getTF(mat[keep,])
+  mat <- getTF(mat[keep,],keep0col)
   idfMat <- getIDF(idfMat[keep,])
   message("Adding ", metadataSlot, " to metadata(x)$", metadataSlot, "...")
   metadata(x)[[metadataSlot]] <- logTFIDF(tf=mat,idf=idfMat , ...)

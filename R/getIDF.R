@@ -20,7 +20,11 @@ getIDF <- function(mat){
 
   message("Computing IDF (inverse document frequency) table... ", appendLF=0)
   # idf <- as(((ncol(mat)+1)/(rowSm2+1)) + 1, "sparseVector")
-  idf = as(ncol(mat)/rowSums(binarizeMat(mat)), "sparseVector")
+  
+  binMat = binarizeMat(mat)
+  #same as ncol but ensures empty documents never get counted, this will make comparison with archR break when keep0LSI ==T
+  numCol = sum(colSums(binMat)>0)  
+  idf = as(numCol/rowSums(binMat), "sparseVector")
   attr(idf, 'names') <- rownames(mat)
   message("done.")
   return(idf)

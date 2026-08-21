@@ -13,6 +13,7 @@ addTfIdf(
   outlierQuantiles = c(0.02, 0.98),
   prune = 1,
   metadataSlot = "TfIdf",
+  keep0col = FALSE,
   ...
 )
 }
@@ -35,10 +36,12 @@ to \code{NULL} to disable outlier detection.}
 \item{prune}{Minimum number of non-outlier cells in which a feature must be
 observed to be retained.}
 
-\item{...}{Additional arguments passed to \code{logTFIDF()}.}
-
-\item{metadataName}{Character scalar giving the name under which the
+\item{metadataSlot}{Character scalar giving the name under which the
 transformed matrix is stored in \code{metadata(x)}.}
+
+\item{keep0col}{Logical indicating to keep columns with colSum = 0}
+
+\item{...}{Additional arguments passed to \code{logTFIDF()}.}
 }
 \value{
 The input \code{SummarizedExperiment} with a log-transformed TF-IDF
