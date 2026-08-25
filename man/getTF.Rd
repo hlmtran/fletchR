@@ -4,12 +4,10 @@
 \alias{getTF}
 \title{Compute term-frequency normalization}
 \usage{
-getTF(mat, keep0col)
+getTF(mat)
 }
 \arguments{
 \item{mat}{A sparse count matrix.}
-
-\item{keep0col}{Logical indicating to keep columns with colSum = 0}
 }
 \value{
 A sparse matrix containing term-frequency normalized values.

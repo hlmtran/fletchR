@@ -15,18 +15,10 @@
 #' @param outlierQuantiles Numeric vector of length two specifying the lower and
 #'   upper quantiles used to identify outlier cells by total accessibility. Set
 #'   to \code{NULL} to disable outlier detection.
-#' @param prune Minimum number of non-outlier cells in which a feature must be
-#'   observed to be retained.
-#' @param metadataSlot Character scalar giving the name under which the
-#'   transformed matrix is stored in \code{metadata(x)}.
-#' @param keep0col Logical indicating to keep columns with colSum = 0
+#' @param assayName name of assay
 #' @param ... Additional arguments passed to \code{logTFIDF()}.
 #'
-#' @return The input \code{SummarizedExperiment} with a log-transformed TF-IDF
-#'   matrix stored in \code{metadata(x)[[metadataName]]}. The stored matrix has
-#'   attributes \code{"idf"} containing the computed inverse document
-#'   frequencies and \code{"outliers"} containing the names of cells excluded
-#'   from IDF estimation.
+#' @return TfIdf matrix in assay
 #'
 #' @details Outlier cells are excluded when estimating inverse document
 #'   frequencies but remain in the transformed matrix. Features observed in
@@ -40,7 +32,7 @@
 #' @import GenomeInfoDb
 #'
 #' @export
-addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM","chrX","chrY"), subsetLSI=FALSE, binarize=TRUE, outlierQuantiles=c(0.02, 0.98), prune=1, metadataSlot="TfIdf", keep0col=FALSE,  ...) { 
+addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM","chrX","chrY"), subsetLSI=FALSE, binarize=TRUE, outlierQuantiles=c(0.02, 0.98), assayName="TfIdf",...) { 
 
   if (is(x, "SummarizedExperiment")) {
     # useMatrix <- match.arg(useMatrix)
@@ -52,28 +44,32 @@ addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM",
   if (!is(mat, "sparseMatrix")) stop("logTfIdf only works on sparse matrices") 
   
   if (binarize) mat <- binarizeMat(mat)
-  
-  #remove 0 accessibility cells
-  if(!keep0col){
-      mat = mat[,!pruneCols(mat,prune=1)]
-    }
-  
+
   if (!is.null(outlierQuantiles)){
-    idxOutliers <- outlierByQuantile(mat,outlierQuantiles)
+    idxOutliers <- outlierByQuantile(mat,outlierQuantiles,excludeZeros=TRUE) #contains both outliers and 0 columns
+    idx0ColSum = colSums(mat) == 0
+    idxOutliers = idxOutliers & !idx0ColSum # keep only outliers
   } else {
     idxOutliers <- logical(ncol(mat))
   }
+
   
   outliers <- colnames(mat)[idxOutliers]
   
   idfMat <- mat[, !idxOutliers, drop = FALSE]
-  keep <- !pruneRows(idfMat, prune)
   
-  mat <- getTF(mat[keep,],keep0col)
-  idfMat <- getIDF(idfMat[keep,])
-  message("Adding ", metadataSlot, " to metadata(x)$", metadataSlot, "...")
-  metadata(x)[[metadataSlot]] <- logTFIDF(tf=mat,idf=idfMat , ...)
-  attr(metadata(x)[[metadataSlot]], 'idf') <- idfMat
-  attr(metadata(x)[[metadataSlot]], 'outliers') <- outliers
+  mat <- getTF(mat)
+  idfMat <- getIDF(idfMat)
+  
+  message("Adding ", assayName, " to assays...")
+  assay(x,assayName) <- logTFIDF(tf=mat,idf=idfMat , ...)
+  metadata(x)[[assayName]] <- list(
+    idf = idfMat,
+   outliers = outliers 
+  )
+  # x@metadata[[assayName]][['idf']] = idfMat
+  # x@metadata[[assayName]][['outliers']] = outliers
+  # attr(assay(x,assayName), 'idf') <- idfMat
+  # attr(assay(x,assayName), 'outliers') <- outliers
   return(x)
 }

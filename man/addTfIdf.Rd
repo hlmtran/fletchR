@@ -11,9 +11,7 @@ addTfIdf(
   subsetLSI = FALSE,
   binarize = TRUE,
   outlierQuantiles = c(0.02, 0.98),
-  prune = 1,
-  metadataSlot = "TfIdf",
-  keep0col = FALSE,
+  assayName = "TfIdf",
   ...
 )
 }
@@ -33,22 +31,12 @@ semantic indexing (LSI) should be used.}
 upper quantiles used to identify outlier cells by total accessibility. Set
 to \code{NULL} to disable outlier detection.}
 
-\item{prune}{Minimum number of non-outlier cells in which a feature must be
-observed to be retained.}
-
-\item{metadataSlot}{Character scalar giving the name under which the
-transformed matrix is stored in \code{metadata(x)}.}
-
-\item{keep0col}{Logical indicating to keep columns with colSum = 0}
+\item{assayName}{name of assay}
 
 \item{...}{Additional arguments passed to \code{logTFIDF()}.}
 }
 \value{
-The input \code{SummarizedExperiment} with a log-transformed TF-IDF
-matrix stored in \code{metadata(x)[[metadataName]]}. The stored matrix has
-attributes \code{"idf"} containing the computed inverse document
-frequencies and \code{"outliers"} containing the names of cells excluded
-from IDF estimation.
+TfIdf matrix in assay
 }
 \description{
 Computes an ArchR-style log-transformed term frequency-inverse document
