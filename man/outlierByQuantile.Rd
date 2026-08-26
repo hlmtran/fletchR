@@ -4,12 +4,14 @@
 \alias{outlierByQuantile}
 \title{Identify outlier cells by total accessibility}
 \usage{
-outlierByQuantile(mat, quantiles = c(0.02, 0.98))
+outlierByQuantile(mat, quantiles = c(0.02, 0.98), excludeZeros = TRUE)
 }
 \arguments{
 \item{mat}{A sparse count matrix.}
 
 \item{quantiles}{Numeric vector, length two, lower and upper quantiles}
+
+\item{excludeZeros}{remove colsum = 0}
 }
 \value{
 logical vector of outlier columns.

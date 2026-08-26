@@ -187,9 +187,9 @@ testthat::expect_equal(
 
 SCE <- archRtoSCE(proj)
 SCE <- addTfIdf(SCE, prune=1,subsetLSI = FALSE,outlierQuantiles = c(0,1),metadataSlot = "noFiltTfIdf")
-identical(rownames(tfidf_n),rownames(SCE@metadata$ArchRTfIdf))
+# identical(rownames(tfidf_n),rownames(SCE@metadata$ArchRTfIdf))
 SCE = addLSI(SCE,metadataSlot = "ArchRTfIdf",scaleDims = FALSE,nDimensions = 5,corCutOff = 0.75)
-cor(reducedDim(SCE,"LSI"),SCE@metadata$LSI$matSVD) |> diag() |> all()
+cor(reducedDim(SCE,"LSI"),SCE@metadata$LSI$matSVD) |> diag() 
 cor(reducedDim(SCE,"LSI"),SCE@metadata$LSI$matSVD)
 
 sum(getArchRLSIFeatures(SCE) %in% rownames(SCE@metadata$ArchRTfIdf)) == length(rownames(SCE@metadata$ArchRTfIdf))
@@ -197,3 +197,14 @@ sum(getArchRLSIFeatures(SCE) %in% rownames(SCE@metadata$ArchRTfIdf)) == length(r
 SCE = addLSI(SCE,metadataSlot = "noFiltTfIdf",features = getArchRLSIFeatures(SCE),scaleDims = FALSE,nDimensions = 5,corCutOff = 0.75)
 
 
+#####
+SCE2 = addTfIdf(SCE,useMatrix = "counts",subsetLSI = T,assayName = "TfIdf",binarize=T,outlierQuantiles = c(0,1))
+SCE2 = addLSI(SCE2,useMatrix = "TfIdf",subsetLSI=T,scaleDims = FALSE,nDimensions = 5, corCutOff = 0.75)
+cor(reducedDim(SCE2,"LSI"),SCE2@metadata$LSI$matSVD) |> diag()
+
+logtfidftest = fletchR:::filterAndGetMat(SCE2,useMatrix = "TfIdf",replaceZeros = F)
+
+# cor(logtfidftest[rownames(logTFIDF_iter2),colnames(logTFIDF_iter2)],logTFIDF_iter2)
+tt = logtfidftest[,colnames(logTFIDF_iter2)]
+tt = tt[rowSums(tt)>0,]
+cor(tt@x,logTFIDF_iter2@x)

@@ -8,7 +8,9 @@ filterAndGetMat(
   x,
   useMatrix = c("TFIDF", "counts", "TileMatrix"),
   excludeChr = c("chrM", "chrX", "chrY"),
-  subsetLSI = FALSE
+  subsetLSI = FALSE,
+  prune = c(1, 1),
+  replaceZeros = TRUE
 )
 }
 \arguments{
@@ -19,6 +21,11 @@ filterAndGetMat(
 \item{excludeChr}{chroms to exclude by default (chrM, chrX, chrY)}
 
 \item{subsetLSI}{subset to mcols(x)$usedForLSI? (FALSE)}
+
+\item{prune}{Minimum number of features in a cell must have and minumum of cells containing a feature
+c(features,cells)}
+
+\item{replaceZeros}{logical indicating whether filtered features should be replaced with 0 instead}
 }
 \value{
 \if{html}{\out{<div class="sourceCode">}}\preformatted{         filtered assay matrix

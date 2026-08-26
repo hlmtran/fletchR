@@ -14,6 +14,7 @@ getTF <- function(mat){
 
   # directly borrowed from ArchR
   colSm <- Matrix::colSums(mat)
+  colSm[colSm==0] = 1
   # rowSm <- Matrix::rowSums(mat)
   message("Term frequency normalization... ", appendLF=FALSE)
   mat@x <- (mat@x / rep.int(colSm, Matrix::diff(mat@p)))
