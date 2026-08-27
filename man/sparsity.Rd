@@ -2,7 +2,16 @@
 % Please edit documentation in R/sparsity.R
 \name{sparsity}
 \alias{sparsity}
+\alias{sparsity,Matrix-method}
+\alias{sparsity,SummarizedExperiment-method}
 \title{compute sparsity for a Matrix, SummarizedExperiment, or SingleCellExperiment}
+\usage{
+sparsity(object)
+
+\S4method{sparsity}{Matrix}(object)
+
+\S4method{sparsity}{SummarizedExperiment}(object)
+}
 \arguments{
 \item{object}{the object whose sparsity we would like to evaluate}
 }

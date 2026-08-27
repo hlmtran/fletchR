@@ -93,7 +93,7 @@ if (!inherits(res, "try-error")) {
   #   check.attributes = FALSE
   # )
   # 
-  projectedMatSVD <- archRiSEE::projectLSI(toProject_minus_outliers, LSI)
+  projectedMatSVD <- fletchR::projectLSI(toProject_minus_outliers, LSI)
   
   # identical(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),])
   # testCorrelation(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),])
@@ -170,20 +170,7 @@ if (!inherits(res, "try-error")) {
 
 # now try the actual archRiSEE function 
 
-col_test <- matrix(
-  c(
-    1, 0, 0,
-    1, 1, 0,
-    1, 1, 1
-  ),
-  nrow = 3
-)
-col_test
 
-testthat::expect_equal(
-  pruneCols(col_test, prune = 2),
-  c(TRUE, FALSE, FALSE)
-)
 
 SCE <- archRtoSCE(proj)
 SCE <- addTfIdf(SCE, prune=1,subsetLSI = FALSE,outlierQuantiles = c(0,1),metadataSlot = "noFiltTfIdf")
@@ -198,13 +185,30 @@ SCE = addLSI(SCE,metadataSlot = "noFiltTfIdf",features = getArchRLSIFeatures(SCE
 
 
 #####
-SCE2 = addTfIdf(SCE,useMatrix = "counts",subsetLSI = T,assayName = "TfIdf",binarize=T,outlierQuantiles = c(0,1))
-SCE2 = addLSI(SCE2,useMatrix = "TfIdf",subsetLSI=T,scaleDims = FALSE,nDimensions = 5, corCutOff = 0.75)
-cor(reducedDim(SCE2,"LSI"),SCE2@metadata$LSI$matSVD) |> diag()
+SCE <- archRtoSCE(proj)
+# SCE = addTfIdf(SCE,useMatrix = "counts",subsetLSI = T,assayName = "TfIdf",binarize=T,outlierQuantiles = c(0,1))
+SCE = addLSI(SCE,useMatrix = "ArchRTfIdf",subsetLSI=T,scaleDims = FALSE,nDimensions = 5, corCutOff = 0.75)
+cor(reducedDim(SCE,"LSI"),SCE@metadata$LSI$matSVD) |> diag()
 
-logtfidftest = fletchR:::filterAndGetMat(SCE2,useMatrix = "TfIdf",replaceZeros = F)
+logtfidftest = fletchR:::filterAndGetMat(SCE,useMatrix = "TfIdf",replaceZeros = F)
 
 # cor(logtfidftest[rownames(logTFIDF_iter2),colnames(logTFIDF_iter2)],logTFIDF_iter2)
 tt = logtfidftest[,colnames(logTFIDF_iter2)]
 tt = tt[rowSums(tt)>0,]
+
+tt2 = logtfidftest
+tt2 = tt2[rownames(tt),]
 cor(tt@x,logTFIDF_iter2@x)
+
+
+z = projectSVD(tt,u=LSI$svd$u,d=LSI$svd$d,v=LSI$svd$v,nDim=5)
+y = projectSVD(tt2,u=LSI$svd$u,d=LSI$svd$d,nDim=5)
+x = projectSVD(logTFIDF_iter2,u=LSI$svd$u,d=LSI$svd$d,v=LSI$svd$v,nDim=5)
+
+d = projectSVD(tt,u=LSI$svd$u,d=LSI$svd$d,nDim=5)
+
+
+identical(d,LSI$matSVD[rownames(d),])
+cor(y[rownames(LSI$matSVD),],LSI$matSVD) |> diag()
+
+cor(d,LSI$matSVD[rownames(d),]) |> diag()
