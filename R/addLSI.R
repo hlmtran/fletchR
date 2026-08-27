@@ -64,13 +64,3 @@ addLSI <- function(x, useMatrix="TfIdf", name="LSI", scaleDims=FALSE, corCutOff=
   message("Done.")
   return(x) 
 }
-
-projectSVD = function(mat,u,d,nDim){
-  V <- Matrix::t(mat) %*% u %*% diag(1/d)
-  svdDiag <- matrix(0,nrow=nDim,ncol=nDim)# D in UDt(V)
-  diag(svdDiag) <- d                                    # as above
-  matSVD <- as.matrix(Matrix::t(svdDiag %*% Matrix::t(V)))      # project mat
-  rownames(matSVD) <- colnames(mat)                             # cell names
-  colnames(matSVD) <- paste0("LSI",seq_len(ncol(matSVD)))       # LSIdim names
-  return(matSVD)     
-}

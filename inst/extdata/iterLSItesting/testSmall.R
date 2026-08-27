@@ -93,7 +93,7 @@ if (!inherits(res, "try-error")) {
   #   check.attributes = FALSE
   # )
   # 
-  projectedMatSVD <- archRiSEE::projectLSI(toProject_minus_outliers, LSI)
+  projectedMatSVD <- fletchR::projectLSI(toProject_minus_outliers, LSI)
   
   # identical(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),])
   # testCorrelation(projectedMatSVD,LSI$matSVD[rownames(projectedMatSVD),])
@@ -195,4 +195,20 @@ logtfidftest = fletchR:::filterAndGetMat(SCE,useMatrix = "TfIdf",replaceZeros = 
 # cor(logtfidftest[rownames(logTFIDF_iter2),colnames(logTFIDF_iter2)],logTFIDF_iter2)
 tt = logtfidftest[,colnames(logTFIDF_iter2)]
 tt = tt[rowSums(tt)>0,]
+
+tt2 = logtfidftest
+tt2 = tt2[rownames(tt),]
 cor(tt@x,logTFIDF_iter2@x)
+
+
+z = projectSVD(tt,u=LSI$svd$u,d=LSI$svd$d,v=LSI$svd$v,nDim=5)
+y = projectSVD(tt2,u=LSI$svd$u,d=LSI$svd$d,nDim=5)
+x = projectSVD(logTFIDF_iter2,u=LSI$svd$u,d=LSI$svd$d,v=LSI$svd$v,nDim=5)
+
+d = projectSVD(tt,u=LSI$svd$u,d=LSI$svd$d,nDim=5)
+
+
+identical(d,LSI$matSVD[rownames(d),])
+cor(y[rownames(LSI$matSVD),],LSI$matSVD) |> diag()
+
+cor(d,LSI$matSVD[rownames(d),]) |> diag()
