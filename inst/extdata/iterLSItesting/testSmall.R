@@ -170,20 +170,7 @@ if (!inherits(res, "try-error")) {
 
 # now try the actual archRiSEE function 
 
-col_test <- matrix(
-  c(
-    1, 0, 0,
-    1, 1, 0,
-    1, 1, 1
-  ),
-  nrow = 3
-)
-col_test
 
-testthat::expect_equal(
-  pruneCols(col_test, prune = 2),
-  c(TRUE, FALSE, FALSE)
-)
 
 SCE <- archRtoSCE(proj)
 SCE <- addTfIdf(SCE, prune=1,subsetLSI = FALSE,outlierQuantiles = c(0,1),metadataSlot = "noFiltTfIdf")
@@ -198,11 +185,12 @@ SCE = addLSI(SCE,metadataSlot = "noFiltTfIdf",features = getArchRLSIFeatures(SCE
 
 
 #####
-SCE2 = addTfIdf(SCE,useMatrix = "counts",subsetLSI = T,assayName = "TfIdf",binarize=T,outlierQuantiles = c(0,1))
-SCE2 = addLSI(SCE2,useMatrix = "TfIdf",subsetLSI=T,scaleDims = FALSE,nDimensions = 5, corCutOff = 0.75)
-cor(reducedDim(SCE2,"LSI"),SCE2@metadata$LSI$matSVD) |> diag()
+SCE <- archRtoSCE(proj)
+# SCE = addTfIdf(SCE,useMatrix = "counts",subsetLSI = T,assayName = "TfIdf",binarize=T,outlierQuantiles = c(0,1))
+SCE = addLSI(SCE,useMatrix = "ArchRTfIdf",subsetLSI=T,scaleDims = FALSE,nDimensions = 5, corCutOff = 0.75)
+cor(reducedDim(SCE,"LSI"),SCE@metadata$LSI$matSVD) |> diag()
 
-logtfidftest = fletchR:::filterAndGetMat(SCE2,useMatrix = "TfIdf",replaceZeros = F)
+logtfidftest = fletchR:::filterAndGetMat(SCE,useMatrix = "TfIdf",replaceZeros = F)
 
 # cor(logtfidftest[rownames(logTFIDF_iter2),colnames(logTFIDF_iter2)],logTFIDF_iter2)
 tt = logtfidftest[,colnames(logTFIDF_iter2)]

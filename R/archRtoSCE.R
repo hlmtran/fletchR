@@ -19,12 +19,12 @@
 #' @export
 #'
 archRtoSCE <- function(proj, ...){
-
+  
   if (!require(ArchR)) stop("This function won't work without an ArchR install")
   g <- archRgenome(proj)
   tileSize <- archRtileSize(proj)
   warning("tileSize set to ", tileSize) 
-        
+  
   # grab everything (after possibly warning the user about the above) 
   if (!"TileMatrix" %in% getAvailableMatrices(proj)) {
     stop("You need to add a TileMatrix to your project to export it")
@@ -40,14 +40,14 @@ archRtoSCE <- function(proj, ...){
     rowRanges(SCE) <- as(rowData(SCE), "GRanges")
     rownames(SCE) <- as.character(rowRanges(SCE))
     genome(SCE) <- g
-
+    
   }
-
+  
   # pull in embeddings etc. 
   keep <- colnames(SCE)
-
+  
   if ("IterativeLSI" %in% names(proj@reducedDims)) {
-   
+    
     message("Copying UMAP parameters to metadata(SCE)$UMAP...")
     metadata(SCE)$LSI <- proj@reducedDims$IterativeLSI 
     reducedDim(SCE, "LSI") <- getReducedDims(proj, "IterativeLSI")[keep, ]
@@ -66,9 +66,9 @@ archRtoSCE <- function(proj, ...){
     rowData(SCE)$usedForLSI <- FALSE
     rowData(SCE)$usedForLSI[queryHits(ol)] <- TRUE
     # res <- try(addLSI(SCE))
-  
+    
   }
-
+  
   if ("UMAP" %in% names(proj@embeddings)) {
     message("Copying UMAP to reducedDim(SCE, 'UMAP')...")
     metadata(SCE)$UMAP <- proj@embeddings$UMAP
@@ -76,14 +76,14 @@ archRtoSCE <- function(proj, ...){
     colnames(reducedDim(SCE, "UMAP")) <- 
       paste0("UMAP", seq_len(ncol(reducedDim(SCE, "UMAP"))))
   }
-
+  
   # since it's feasible to stack (e.g. DEM + H3K4me + H3K27me)
   mainExpName(SCE) <- "FragmentCounts"
   rowRanges(SCE)$idx <- NULL # irrelevant to us and gets in the way
   rowData(SCE)$assay <- "FragmentCounts" # for binding to any other altExps
   message("You may want to update mcols(SCE)$assay to be more specific.")
   message("(For example, 'DEM' or 'H3K27me3' or 'H3K4me3' or 'ATAC'...)")
-
+  
   # could also add others if it makes sense here 
   mats <- setdiff(getAvailableMatrices(proj), "TileMatrix")
   for (mat in mats) {
@@ -96,19 +96,19 @@ archRtoSCE <- function(proj, ...){
       altExp(SCE, mat) <- getMatrixFromProject(proj, mat)[, keep]
     }
   }
-
+  
   message("Copying cellColData...")
   colData(SCE) <- getCellColData(proj)
   if("usedForLSI" %in% names(rowData(SCE))){
-    SCE <- addTfIdf(SCE, prune=1,subsetLSI = TRUE,outlierQuantiles = c(0,1),metadataSlot = "ArchRTfIdf")
-    }
-  SCE <- addTfIdf(SCE, prune=1)
+    SCE <- addTfIdf(SCE, useMatrix = "counts", subsetLSI = TRUE,outlierQuantiles = c(0,1), assayName = "ArchRTfIdf")
+  }
+  SCE <- addTfIdf(SCE,useMatrix = "counts", subsetLSI = FALSE, outlierQuantiles = c(0.02,0.98), assayName="TfIdf")
   
   message("Copying metadata...")
   md <- archRmetadata(proj)
   for (i in names(md)) metadata(SCE)[[i]] <- md[[i]]
-
+  
   message("Done.")
   return(SCE)
-
+  
 }

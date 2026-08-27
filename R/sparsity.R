@@ -16,14 +16,37 @@
 #' @export
 #'
 #' @name          sparsity
-NULL
+# NULL
+# 
+# if (!isGeneric("sparsity")) { 
+#   setGeneric("sparsity", 
+#              function(object) 1 - (length(object@x) / prod(dim(object))))
+# }
+# 
+# setMethod("sparsity", "Matrix", 
+#           function(object) 1 - (length(object@x) / prod(dim(object))))
+# setMethod("sparsity", "SummarizedExperiment", 
+#           function(object) 1 - (length(assay(object)@x) / prod(dim(object))))
+setGeneric(
+  "sparsity",
+  function(object) standardGeneric("sparsity")
+)
 
-if (!isGeneric("sparsity")) { 
-  setGeneric("sparsity", 
-             function(object) 1 - (length(object@x) / prod(dim(object))))
-}
+#' @rdname sparsity
+setMethod(
+  "sparsity",
+  signature(object = "Matrix"),
+  function(object) {
+    1 - length(object@x) / prod(dim(object))
+  }
+)
 
-setMethod("sparsity", "Matrix", 
-          function(object) 1 - (length(object@x) / prod(dim(object))))
-setMethod("sparsity", "SummarizedExperiment", 
-          function(object) 1 - (length(assay(object)@x) / prod(dim(object))))
+#' @rdname sparsity
+setMethod(
+  "sparsity",
+  signature(object = "SummarizedExperiment"),
+  function(object) {
+    x <- SummarizedExperiment::assay(object)
+    sparsity(x)
+  }
+)
