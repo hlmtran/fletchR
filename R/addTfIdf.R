@@ -65,7 +65,7 @@ addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM",
   assay(x,assayName) <- logTFIDF(tf=mat,idf=idfMat , ...)
   metadata(x)[[assayName]] <- list(
     idf = idfMat,
-   outliers = outliers 
+    outliers = outliers 
   )
   # x@metadata[[assayName]][['idf']] = idfMat
   # x@metadata[[assayName]][['outliers']] = outliers
