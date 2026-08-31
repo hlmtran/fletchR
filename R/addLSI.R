@@ -24,43 +24,78 @@
 #'
 #' @export
 #'
-addLSI <- function(x, useMatrix="TfIdf", name="LSI", scaleDims=FALSE, corCutOff=0.75, excludeChr=c("chrM","chrX","chrY"),nDimensions=30, depth="nFrags", seed = 1,subsetLSI = FALSE,...) { 
+addLSI <- function(x,
+  useMatrix="TfIdf",
+  name="LSI",
+  scaleDims=FALSE,
+  corCutOff=0.75,
+  excludeChr=c("chrM","chrX","chrY"),
+  nDimensions=30,
+  depth="nFrags",
+  seed = 1,
+  subsetLSI = FALSE,...) {
   set.seed(seed)
   stopifnot(depth %in% names(colData(x)))
-  # useMatrix <- match.arg(useMatrix) 
-  # keep <- setdiff(seqlevels(x), excludeChr)
-  # if (subsetLSI) {
-  #   stopifnot("usedForLSI" %in% names(mcols(x)))
-  #   idx <- which(mcols(x)$usedForLSI)
-  # } else {
-  #   idx <- seq_len(nrow(x))
-  # }
-  # message("Subsetting TF-IDF matrix...") 
-  # mat <- assay(keepSeqlevels(x[idx,], keep, pruning.mode="coarse"), useMatrix)
+ 
   mat <- filterAndGetMat(x=x,useMatrix=useMatrix,excludeChr=excludeChr,subsetLSI=subsetLSI,prune=c(1,1),replaceZeros = FALSE)
-  message("Running SVD...")
-  outliers = colnames(mat) %in% metadata(x)[[useMatrix]][["outliers"]]#returns NULL if doesn't exist in case of stacking
-  if(is.null(outliers)){
-    message("Either No outliers were detected or metadata(x)[[useMatrix]][['outliers'] does not exist. Confirm prior to exceeding")
-    }
-  mat = mat[rowSums(mat[,!outliers])>0,]
-  svd <- irlba::irlba(mat[,!outliers], nDimensions, nDimensions)
-  # svdDiag <- matrix(0, nrow=nDimensions + 5, ncol=nDimensions + 5)
-  # diag(svdDiag) <- svd$d
-  # matSVD <- t(svdDiag %*% t(svd$v))
-  # rownames(matSVD) <- colnames(mat)
-  matSVD = projectSVD(mat,svd$u,svd$d,nDimensions)
-  if (scaleDims) {
-    # check and see if this is doing it right!
-    message("Scaling matSVD...")
-    matSVD <- rowZscores(matSVD)
-  }
-  message("Checking for depth-correlated columns...")
-  toKeep <- which(cor(matSVD, colData(x)[[depth]])[, 1] < corCutOff)
-  message("Kept ", (length(toKeep)/ncol(matSVD)*100), "% of columns.")
-  matSVD <- matSVD[, toKeep,drop=FALSE]
-  colnames(matSVD) <- paste0("LSI",seq_len(ncol(matSVD)))
+  # message("Running SVD...")
+
+  outliers = getOutliersIdx(x,useMatrix=useMatrix)
+  matSVD <- calcLSI(mat=mat, outliers=outliers, nDimensions=nDimensions, scaleDims=scaleDims)
+  # mat = mat[rowSums(mat[,!outliers])>0,]
+  # svd <- irlba::irlba(mat[,!outliers], nDimensions, nDimensions)
+  
+  # matSVD = projectSVD(mat,svd$u,svd$d,nDimensions)
+  # if (scaleDims) {
+  #   # check and see if this is doing it right!
+  #   message("Scaling matSVD...")
+  #   matSVD <- rowZscores(matSVD)
+  # }
+
+  # matSVD <- removeDepthCorrelatedDims(projectedMat=matSVD, depth=colData(x)[[depth]], corCutOff=corCutOff)
+
   reducedDim(x, name) <- matSVD
   message("Done.")
   return(x) 
 }
+
+#' Get the outlier cells from a SingleCellExperiment object
+#'
+#' @param x A SingleCellExperiment object.
+#' @param useMatrix The name of the assay to use for outlier detection (default is "TfIdf").
+#' @return A logical vector indicating which cells are outliers.
+getOutliersIdx <- function(x, useMatrix="TfIdf") {
+  outliers = metadata(x)[[useMatrix]][["outliers"]] # returns NULL if doesn't exist
+  if (is.null(outliers)) {
+    message("Either No outliers were detected or metadata(x)[[useMatrix]][['outliers'] does not exist. Confirm prior to exceeding")
+  }
+  return(colnames(x) %in% outliers)
+}
+
+#' Core computational engine: Compute LSI on a matrix
+#'
+#' @param mat Feature-by-cell matrix (e.g. TF-IDF).
+#' @param nDimensions Number of singular values to calculate.
+#' @param outliers Logical vector indicating outlier cells to ignore during SVD fitting.
+#' @param scaleDims Logical; whether to Z-score LSI dimensions across cells.
+#' @return A cell-by-dimension projected matrix.
+calcLSI <- function(mat, 
+                    nDimensions = 30, 
+                    outliers = NULL, 
+                    scaleDims = FALSE) {
+  if (is.null(outliers)) {
+    outliers <- rep(FALSE, ncol(mat))
+  }
+  message("Running SVD...")
+  mat = mat[rowSums(mat[,!outliers])>0,]
+  svd <- irlba::irlba(mat[,!outliers], nDimensions, nDimensions)
+    
+  matSVD = projectSVD(mat,svd$u,svd$d,nDimensions)
+  if (scaleDims) {
+    message("Scaling matSVD...")
+    matSVD <- rowZscores(matSVD)
+  } 
+  
+  return(matSVD)
+}
+
