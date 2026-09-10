@@ -11,6 +11,7 @@ addTfIdf(
   subsetLSI = FALSE,
   binarize = TRUE,
   outlierQuantiles = c(0.02, 0.98),
+  scaleTo = 10000,
   assayName = "TfIdf",
   ...
 )
@@ -30,6 +31,8 @@ semantic indexing (LSI) should be used.}
 \item{outlierQuantiles}{Numeric vector of length two specifying the lower and
 upper quantiles used to identify outlier cells by total accessibility. Set
 to \code{NULL} to disable outlier detection.}
+
+\item{scaleTo}{Scale factor for the logTFIDF transformation}
 
 \item{assayName}{name of assay}
 

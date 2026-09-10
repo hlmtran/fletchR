@@ -4,12 +4,21 @@
 \alias{calcTfIdf}
 \title{Core computation: Calculate log(TF-IDF), IDF vector/matrix, and outlier cell IDs}
 \usage{
-calcTfIdf(mat, outlierQuantiles = c(0.02, 0.98), excludeZeros = TRUE, ...)
+calcTfIdf(
+  mat,
+  outlierQuantiles = c(0.02, 0.98),
+  excludeZeros = TRUE,
+  scaleTo = 10000
+)
 }
 \arguments{
 \item{mat}{A sparse matrix (features x cells).}
 
 \item{outlierQuantiles}{Numeric vector of length two or NULL.}
+
+\item{excludeZeros}{Logical indicating whether to exclude cells with zero total counts when identifying outliers.}
+
+\item{scaleTo}{Numeric scalar; the scale factor for the logTFIDF transformation.}
 
 \item{...}{Additional arguments passed to logTFIDF().}
 }

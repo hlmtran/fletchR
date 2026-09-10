@@ -59,6 +59,11 @@ addLSI <- function(x,
   return(x) 
 }
 
+#' Get the outlier cells from a SingleCellExperiment object
+#'
+#' @param x A SingleCellExperiment object.
+#' @param useMatrix The name of the assay to use for outlier detection (default is "TfIdf").
+#' @return A logical vector indicating which cells are outliers.
 getOutliersIdx <- function(x, useMatrix="TfIdf") {
   outliers = metadata(x)[[useMatrix]][["outliers"]] # returns NULL if doesn't exist
   if (is.null(outliers)) {
@@ -94,6 +99,12 @@ calcLSI <- function(mat,
   return(matSVD)
 }
 
+#' Remove LSI dimensions that are correlated with sequencing depth
+#'
+#' @param projectedMat The cell-by-dimension matrix obtained from LSI.
+#' @param depth A numeric vector representing sequencing depth for each cell.
+#' @param corCutOff A numeric threshold for correlation; dimensions with correlation above this value will be removed.
+#' @return A filtered cell-by-dimension matrix with depth-correlated dimensions removed.
 removedepthCorrelatedDims <- function(projectedMat, depth, corCutOff=0.75) {
   message("Checking for depth-correlated columns...")
   toKeep <- which(cor(projectedMat, depth)[, 1] < corCutOff)

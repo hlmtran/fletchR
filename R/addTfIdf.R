@@ -15,6 +15,7 @@
 #' @param outlierQuantiles Numeric vector of length two specifying the lower and
 #'   upper quantiles used to identify outlier cells by total accessibility. Set
 #'   to \code{NULL} to disable outlier detection.
+#' @param scaleTo Scale factor for the logTFIDF transformation
 #' @param assayName name of assay
 #' @param ... Additional arguments passed to \code{logTFIDF()}.
 #'
@@ -36,8 +37,10 @@ addTfIdf <- function(x,
   useMatrix=c("counts","TileMatrix"), 
   excludeChr=c("chrM","chrX","chrY"), 
   subsetLSI=FALSE, binarize=TRUE, 
-  outlierQuantiles=c(0.02, 0.98), 
-  assayName="TfIdf",...) { 
+  outlierQuantiles=c(0.02, 0.98),
+  scaleTo=10000,   
+  assayName="TfIdf",
+  ...) { 
 
   if (is(x, "SummarizedExperiment")) {
     # useMatrix <- match.arg(useMatrix)
@@ -45,31 +48,33 @@ addTfIdf <- function(x,
                            subsetLSI=subsetLSI)
   }
 
-  # if (is(idf, "sparseMatrix")) idf <- attr(idf, 'idf') 
-  if (!is(mat, "sparseMatrix")) stop("logTfIdf only works on sparse matrices") 
+  # # if (is(idf, "sparseMatrix")) idf <- attr(idf, 'idf') 
+  # if (!is(mat, "sparseMatrix")) stop("logTfIdf only works on sparse matrices") 
   
 
-  if (!is.null(outlierQuantiles)){
-    idxOutliers <- outlierByQuantile(mat,outlierQuantiles,excludeZeros=TRUE) #contains both outliers and 0 columns
-    idx0ColSum = colSums(mat) == 0
-    idxOutliers = idxOutliers & !idx0ColSum # keep only outliers
-  } else {
-    idxOutliers <- logical(ncol(mat))
-  }
+  # if (!is.null(outlierQuantiles)){
+  #   idxOutliers <- outlierByQuantile(mat,outlierQuantiles,excludeZeros=TRUE) #contains both outliers and 0 columns
+  #   idx0ColSum = colSums(mat) == 0
+  #   idxOutliers = idxOutliers & !idx0ColSum # keep only outliers
+  # } else {
+  #   idxOutliers <- logical(ncol(mat))
+  # }
 
   
-  outliers <- colnames(mat)[idxOutliers]
+  # outliers <- colnames(mat)[idxOutliers]
   
-  idfMat <- mat[, !idxOutliers, drop = FALSE]
+  # idfMat <- mat[, !idxOutliers, drop = FALSE]
   
-  mat <- getTF(mat)
-  idfMat <- getIDF(idfMat)
+  # mat <- getTF(mat)
+  # idfMat <- getIDF(idfMat)
   
+  res <- calcTfIdf(mat, outlierQuantiles=outlierQuantiles, excludeZeros=TRUE, scaleTo=scaleTo)
+
   message("Adding ", assayName, " to assays...")
-  assay(x,assayName) <- logTFIDF(tf=mat,idf=idfMat , ...)
+  assay(x,assayName) <- res[["tfidf"]] #logTFIDF(tf=mat,idf=idfMat , ...)
   metadata(x)[[assayName]] <- list(
-    idf = idfMat,
-    outliers = outliers 
+    idf = res[["idf"]],
+    outliers = res[["outliers"]] 
   )
   # x@metadata[[assayName]][['idf']] = idfMat
   # x@metadata[[assayName]][['outliers']] = outliers
@@ -82,13 +87,15 @@ addTfIdf <- function(x,
 #'
 #' @param mat A sparse matrix (features x cells).
 #' @param outlierQuantiles Numeric vector of length two or NULL.
+#' @param excludeZeros Logical indicating whether to exclude cells with zero total counts when identifying outliers.
+#' @param scaleTo Numeric scalar; the scale factor for the logTFIDF transformation.
 #' @param ... Additional arguments passed to logTFIDF().
 #'
 #' @return A list containing:
 #'   \item{tfidf}{The logTFIDF sparse matrix}
 #'   \item{idf}{The computed IDF values}
 #'   \item{outliers}{Character vector of outlier column names}
-calcTfIdf <- function(mat, outlierQuantiles = c(0.02, 0.98), excludeZeros = TRUE, ...) {
+calcTfIdf <- function(mat, outlierQuantiles = c(0.02, 0.98), excludeZeros = TRUE, scaleTo=10000) {
   if (!is(mat, "sparseMatrix")) stop("logTfIdf only works on sparse matrices")
 
   if (!is.null(outlierQuantiles)) {
@@ -106,7 +113,7 @@ calcTfIdf <- function(mat, outlierQuantiles = c(0.02, 0.98), excludeZeros = TRUE
   mat <- getTF(mat)
   idfMat <- getIDF(idfMat)
 
-  tfidfMat <- logTFIDF(tf = mat, idf = idfMat, ...)
+  tfidfMat <- logTFIDF(tf = mat, idf = idfMat, scaleTo = scaleTo)
 
   return(list(
     tfidf = tfidfMat,
