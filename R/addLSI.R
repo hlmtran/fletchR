@@ -24,19 +24,19 @@
 #'
 #' @export
 #'
-addLSI <- function(x, useMatrix="TfIdf", name="LSI", scaleDims=FALSE, corCutOff=0.75, excludeChr=c("chrM","chrX","chrY"),nDimensions=30, depth="nFrags", seed = 1,subsetLSI = FALSE,...) { 
+addLSI <- function(x,
+  useMatrix="TfIdf",
+  name="LSI",
+  scaleDims=FALSE,
+  corCutOff=0.75,
+  excludeChr=c("chrM","chrX","chrY"),
+  nDimensions=30,
+  depth="nFrags",
+  seed = 1,
+  subsetLSI = FALSE,...) {
   set.seed(seed)
   stopifnot(depth %in% names(colData(x)))
-  # useMatrix <- match.arg(useMatrix) 
-  # keep <- setdiff(seqlevels(x), excludeChr)
-  # if (subsetLSI) {
-  #   stopifnot("usedForLSI" %in% names(mcols(x)))
-  #   idx <- which(mcols(x)$usedForLSI)
-  # } else {
-  #   idx <- seq_len(nrow(x))
-  # }
-  # message("Subsetting TF-IDF matrix...") 
-  # mat <- assay(keepSeqlevels(x[idx,], keep, pruning.mode="coarse"), useMatrix)
+ 
   mat <- filterAndGetMat(x=x,useMatrix=useMatrix,excludeChr=excludeChr,subsetLSI=subsetLSI,prune=c(1,1),replaceZeros = FALSE)
   message("Running SVD...")
   outliers = colnames(mat) %in% metadata(x)[[useMatrix]][["outliers"]]#returns NULL if doesn't exist in case of stacking
@@ -45,10 +45,7 @@ addLSI <- function(x, useMatrix="TfIdf", name="LSI", scaleDims=FALSE, corCutOff=
     }
   mat = mat[rowSums(mat[,!outliers])>0,]
   svd <- irlba::irlba(mat[,!outliers], nDimensions, nDimensions)
-  # svdDiag <- matrix(0, nrow=nDimensions + 5, ncol=nDimensions + 5)
-  # diag(svdDiag) <- svd$d
-  # matSVD <- t(svdDiag %*% t(svd$v))
-  # rownames(matSVD) <- colnames(mat)
+  
   matSVD = projectSVD(mat,svd$u,svd$d,nDimensions)
   if (scaleDims) {
     # check and see if this is doing it right!

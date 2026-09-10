@@ -9,6 +9,7 @@ filterAndGetMat(
   useMatrix = c("TFIDF", "counts", "TileMatrix"),
   excludeChr = c("chrM", "chrX", "chrY"),
   subsetLSI = FALSE,
+  binarize = FALSE,
   prune = c(1, 1),
   replaceZeros = TRUE
 )
@@ -21,6 +22,8 @@ filterAndGetMat(
 \item{excludeChr}{chroms to exclude by default (chrM, chrX, chrY)}
 
 \item{subsetLSI}{subset to mcols(x)$usedForLSI? (FALSE)}
+
+\item{binarize}{binarize matrix? (TRUE)}
 
 \item{prune}{Minimum number of features in a cell must have and minumum of cells containing a feature
 c(features,cells)}

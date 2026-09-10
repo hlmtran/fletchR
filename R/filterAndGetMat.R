@@ -4,9 +4,10 @@
 #' @param useMatrix     name of assay to use ("TFIDF")
 #' @param excludeChr    chroms to exclude by default (chrM, chrX, chrY)
 #' @param subsetLSI     subset to mcols(x)$usedForLSI? (FALSE)
-#' @param replaceZeros  logical indicating whether filtered features should be replaced with 0 instead
+#' @param binarize      binarize matrix? (TRUE)
 #' @param prune         Minimum number of features in a cell must have and minumum of cells containing a feature
-#' c(features,cells)
+#'                      c(features,cells)
+#' @param replaceZeros  logical indicating whether filtered features should be replaced with 0 instead
 #' @return              filtered assay matrix
 #'
 #' @details             Subsets to features marked by `mcols(x)$usedForLSI`
@@ -22,6 +23,7 @@ filterAndGetMat <- function(
     useMatrix = c("TFIDF","counts","TileMatrix"),
     excludeChr = c("chrM", "chrX", "chrY"),
     subsetLSI = FALSE,
+    binarize = FALSE,
     prune = c(1,1),
     replaceZeros = TRUE
 ) {
@@ -39,7 +41,7 @@ filterAndGetMat <- function(
   # mat <- assay(keepSeqlevels(x[idx, ], keep, pruning.mode = "coarse"),
   #              useMatrix)
   mat <- assay(x,useMatrix)
-  
+
   rowToPrune = pruneRows(mat,prune=prune[1])
   colToPrune = pruneCols(mat,prune=prune[2])
   
@@ -59,6 +61,8 @@ filterAndGetMat <- function(
   }else{
     mat <- mat[keepRows, keepCols]
   }
+
+  if (binarize) mat <- binarizeMat(mat)
   return(mat)
 }
 

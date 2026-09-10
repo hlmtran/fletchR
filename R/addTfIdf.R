@@ -36,14 +36,13 @@ addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM",
 
   if (is(x, "SummarizedExperiment")) {
     # useMatrix <- match.arg(useMatrix)
-    mat <- filterAndGetMat(x=x, useMatrix=useMatrix, excludeChr=excludeChr, 
+    mat <- filterAndGetMat(x=x, useMatrix=useMatrix, excludeChr=excludeChr,binarize=binarize, 
                            subsetLSI=subsetLSI)
   }
 
   # if (is(idf, "sparseMatrix")) idf <- attr(idf, 'idf') 
   if (!is(mat, "sparseMatrix")) stop("logTfIdf only works on sparse matrices") 
   
-  if (binarize) mat <- binarizeMat(mat)
 
   if (!is.null(outlierQuantiles)){
     idxOutliers <- outlierByQuantile(mat,outlierQuantiles,excludeZeros=TRUE) #contains both outliers and 0 columns

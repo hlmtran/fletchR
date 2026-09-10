@@ -1,4 +1,4 @@
-featureSelectionLSI = function(mat,quantile=0.995,varFeatures=25000,totalFeatures=500000){
+findTopFeatures = function(mat,quantile=0.995,varFeatures=25000,totalFeatures=500000){
   stopifnot(inherits(mat, "Matrix"))
   if (quantile < 0 || quantile > 1) {
     stop("Quantile must be between 0 and 1.")
@@ -32,9 +32,3 @@ featureSelectionLSI = function(mat,quantile=0.995,varFeatures=25000,totalFeature
   selected <- sort(selected)
   mat[selected, , drop = FALSE]
 }
- 
-# testCorrelation <- function(pCheck, pCheck2) {
-#   lapply(seq_len(ncol(pCheck)), function(x) {
-#     cor(pCheck[, x], pCheck2[, x])
-#   })
-# }
