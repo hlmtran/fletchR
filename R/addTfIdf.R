@@ -32,7 +32,12 @@
 #' @import GenomeInfoDb
 #'
 #' @export
-addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM","chrX","chrY"), subsetLSI=FALSE, binarize=TRUE, outlierQuantiles=c(0.02, 0.98), assayName="TfIdf",...) { 
+addTfIdf <- function(x, 
+  useMatrix=c("counts","TileMatrix"), 
+  excludeChr=c("chrM","chrX","chrY"), 
+  subsetLSI=FALSE, binarize=TRUE, 
+  outlierQuantiles=c(0.02, 0.98), 
+  assayName="TfIdf",...) { 
 
   if (is(x, "SummarizedExperiment")) {
     # useMatrix <- match.arg(useMatrix)
@@ -71,4 +76,41 @@ addTfIdf <- function(x, useMatrix=c("counts","TileMatrix"), excludeChr=c("chrM",
   # attr(assay(x,assayName), 'idf') <- idfMat
   # attr(assay(x,assayName), 'outliers') <- outliers
   return(x)
+}
+
+#' Core computation: Calculate log(TF-IDF), IDF vector/matrix, and outlier cell IDs
+#'
+#' @param mat A sparse matrix (features x cells).
+#' @param outlierQuantiles Numeric vector of length two or NULL.
+#' @param ... Additional arguments passed to logTFIDF().
+#'
+#' @return A list containing:
+#'   \item{tfidf}{The logTFIDF sparse matrix}
+#'   \item{idf}{The computed IDF values}
+#'   \item{outliers}{Character vector of outlier column names}
+calcTfIdf <- function(mat, outlierQuantiles = c(0.02, 0.98), excludeZeros = TRUE, ...) {
+  if (!is(mat, "sparseMatrix")) stop("logTfIdf only works on sparse matrices")
+
+  if (!is.null(outlierQuantiles)) {
+    idxOutliers <- outlierByQuantile(mat, outlierQuantiles, excludeZeros = excludeZeros) # contains both outliers and 0 columns
+    idx0ColSum <- colSums(mat) == 0
+    idxOutliers <- idxOutliers & !idx0ColSum # keep only outliers
+  } else {
+    idxOutliers <- logical(ncol(mat))
+  }
+
+  outliers <- colnames(mat)[idxOutliers]
+
+  idfMat <- mat[, !idxOutliers, drop = FALSE]
+
+  mat <- getTF(mat)
+  idfMat <- getIDF(idfMat)
+
+  tfidfMat <- logTFIDF(tf = mat, idf = idfMat, ...)
+
+  return(list(
+    tfidf = tfidfMat,
+    idf = idfMat,
+    outliers = outliers
+  ))
 }
