@@ -23,6 +23,7 @@ filterAndGetMat <- function(
     useMatrix = c("TFIDF","counts","TileMatrix"),
     excludeChr = c("chrM", "chrX", "chrY"),
     subsetLSI = FALSE,
+    features = NULL,
     binarize = FALSE,
     prune = c(1,1),
     replaceZeros = TRUE
@@ -36,16 +37,23 @@ filterAndGetMat <- function(
   } else {
     idx <- rep(TRUE,nrow(x))
   }
+   if (!is.null(features)) {
+      selectedFeatures = rownames(x) %in% features
+  } else {
+      selectedFeatures = rep(TRUE,nrow(x))
+  }
+
   # useMatrix <- match.arg(useMatrix)
   message("Subsetting assay matrix ", useMatrix, "...")
   # mat <- assay(keepSeqlevels(x[idx, ], keep, pruning.mode = "coarse"),
   #              useMatrix)
   mat <- assay(x,useMatrix)
 
+
   rowToPrune = pruneRows(mat,prune=prune[1])
   colToPrune = pruneCols(mat,prune=prune[2])
   
-  keepRows = idx&chrKeep&(!rowToPrune)
+  keepRows = idx&chrKeep&(!rowToPrune)&selectedFeatures
   keepCols = !colToPrune
   
   if(replaceZeros){

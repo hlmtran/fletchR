@@ -9,6 +9,7 @@ filterAndGetMat(
   useMatrix = c("TFIDF", "counts", "TileMatrix"),
   excludeChr = c("chrM", "chrX", "chrY"),
   subsetLSI = FALSE,
+  features = NULL,
   binarize = FALSE,
   prune = c(1, 1),
   replaceZeros = TRUE

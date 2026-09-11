@@ -1,6 +1,15 @@
-findTopFeatures = function(mat,quantile=0.995,varFeatures=25000,totalFeatures=500000){
+#' Find top features based on top accessible features
+#' 
+#' @param mat           a sparse matrix (dgCMatrix) of features x cells
+#' @param filterQuantile numeric value between 0 and 1; the quantile
+#'                       of features to filter out from the top of the distribution
+#' @param varFeatures    integer; the number of features to return after filtering
+#' @param totalFeatures  integer; the total number of features in the matrix
+#' @return               character vector of feature names
+#' 
+findTopFeatures = function(mat,filterQuantile=0.995,varFeatures=25000,totalFeatures=500000){
   stopifnot(inherits(mat, "Matrix"))
-  if (quantile < 0 || quantile > 1) {
+  if (filterQuantile < 0 || filterQuantile > 1) {
     stop("Quantile must be between 0 and 1.")
   }
   if (varFeatures < 1000) {
@@ -26,9 +35,10 @@ findTopFeatures = function(mat,quantile=0.995,varFeatures=25000,totalFeatures=50
     message("Not enough non-zero features to apply upper-tail filtering.")
     selected <- head(ranked, varFeatures)
   }
-  # Remove any zero-count features
+  # # Remove any zero-count features
   selected <- selected[featureTotals[selected] > 0]
-  # Preserve original feature order
-  selected <- sort(selected)
-  mat[selected, , drop = FALSE]
+  # # Preserve original feature order
+  # selected <- sort(selected)
+  # mat[selected, , drop = FALSE]
+  return(rownames(mat)[selected])
 }

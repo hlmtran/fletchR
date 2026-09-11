@@ -36,7 +36,8 @@
 addTfIdf <- function(x, 
   useMatrix=c("counts","TileMatrix"), 
   excludeChr=c("chrM","chrX","chrY"), 
-  subsetLSI=FALSE, binarize=TRUE, 
+  subsetLSI=FALSE, 
+  binarize=TRUE, 
   outlierQuantiles=c(0.02, 0.98),
   scaleTo=10000,   
   assayName="TfIdf",
@@ -48,26 +49,6 @@ addTfIdf <- function(x,
                            subsetLSI=subsetLSI)
   }
 
-  # # if (is(idf, "sparseMatrix")) idf <- attr(idf, 'idf') 
-  # if (!is(mat, "sparseMatrix")) stop("logTfIdf only works on sparse matrices") 
-  
-
-  # if (!is.null(outlierQuantiles)){
-  #   idxOutliers <- outlierByQuantile(mat,outlierQuantiles,excludeZeros=TRUE) #contains both outliers and 0 columns
-  #   idx0ColSum = colSums(mat) == 0
-  #   idxOutliers = idxOutliers & !idx0ColSum # keep only outliers
-  # } else {
-  #   idxOutliers <- logical(ncol(mat))
-  # }
-
-  
-  # outliers <- colnames(mat)[idxOutliers]
-  
-  # idfMat <- mat[, !idxOutliers, drop = FALSE]
-  
-  # mat <- getTF(mat)
-  # idfMat <- getIDF(idfMat)
-  
   res <- calcTfIdf(mat, outlierQuantiles=outlierQuantiles, excludeZeros=TRUE, scaleTo=scaleTo)
 
   message("Adding ", assayName, " to assays...")
@@ -76,10 +57,7 @@ addTfIdf <- function(x,
     idf = res[["idf"]],
     outliers = res[["outliers"]] 
   )
-  # x@metadata[[assayName]][['idf']] = idfMat
-  # x@metadata[[assayName]][['outliers']] = outliers
-  # attr(assay(x,assayName), 'idf') <- idfMat
-  # attr(assay(x,assayName), 'outliers') <- outliers
+
   return(x)
 }
 
