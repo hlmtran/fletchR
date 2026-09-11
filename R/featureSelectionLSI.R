@@ -34,7 +34,7 @@ firstPass = function(x,preTfIdf=NULL,quantile=0.995,varFeatures=25000,totalFeatu
                   idf = metadata(x)[[preTfIdf]][["idf"]],
                   outliers = metadata(x)[[preTfIdf]][["outliers"]])
   } else {
-    tfidfRes <- calcTfIdf(mat, outlierQuantiles=outlierQuantiles, excludeZeros=TRUE, scaleTo=scaleTo)
+    tfidfRes <- calcTfIdf(mat[selectedFeatures,], outlierQuantiles=outlierQuantiles, excludeZeros=TRUE, scaleTo=scaleTo)
   }  
 
 }
