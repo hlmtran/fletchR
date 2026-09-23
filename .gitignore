@@ -50,3 +50,12 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# RDS files in repository root only
+/*.rds
+
+# Generated/test directories anywhere
+**/__MACOSX/
+**/PBSmall/
+**/PBMCSmall/
+**/ArchRLogs/

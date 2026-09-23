@@ -26,7 +26,7 @@ findVariableFeaturesByCluster <- function(mat , clusters, nFeatures = 25000, sca
   
   # 2. Log-Normalize (CP10K)
   groupMat <- t(t(groupMat) / colSums(groupMat)) * scaleTo
-  groupMat <- log2(groupMat + 1) |> as("dgCMatrix")
+  groupMat@x <- log2(groupMat@x +1) #log2(groupMat + 1) |> as("dgCMatrix")
   
   # 3. Calculate Variance
   if (method == "var") {
