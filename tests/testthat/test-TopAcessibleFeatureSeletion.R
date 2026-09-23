@@ -139,4 +139,12 @@ describe("findTopFeatures()", {
     expect_null(res)
   })
   
+  it("checks out with ArchR results",{
+    mat = readRDS(testthat::test_path("..","testdata","first_pass_binMat.rds"))
+    archRTopFeats = readRDS(testthat::test_path("..","testdata","first_pass_topFeatures.rds")) 
+    archRTopFeats$end = archRTopFeats$start + 10000 - 1 #tileSize = 10000 for this set
+    archRTopFeats = archRTopFeats |> as("GRanges") |> as.character()
+    topFeats = findTopFeatures(mat,filterQuantile = .995,varFeatures = 1000)
+    expect_all_true(archRTopFeats %in% topFeats)
+    })
 })

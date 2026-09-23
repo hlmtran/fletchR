@@ -35,7 +35,7 @@ archRtoSCE <- function(proj, ...){
               "SingleCellExperiment")
     assayNames(SCE) <- "counts"
     metadata(SCE)$tileSize <- tileSize
-    rowData(SCE)$start <- rowData(SCE)$start + 1
+    # rowData(SCE)$start <- rowData(SCE)$start + 1
     rowData(SCE)$end <- rowData(SCE)$start + tileSize - 1
     rowRanges(SCE) <- as(rowData(SCE), "GRanges")
     rownames(SCE) <- as.character(rowRanges(SCE))
@@ -55,8 +55,8 @@ archRtoSCE <- function(proj, ...){
       paste0("LSI", seq_len(ncol(reducedDim(SCE, "LSI"))))
     
     LSIfeats <- metadata(SCE)$LSI$LSIFeatures
-    LSIfeats$end <- LSIfeats$start + metadata(SCE)$tileSize
-    LSIfeats$start <- LSIfeats$start + 1
+    LSIfeats$end <- LSIfeats$start + metadata(SCE)$tileSize - 1
+    # LSIfeats$start <- LSIfeats$start + 1
     LSIgr <- as(LSIfeats, "GRanges")
     names(LSIgr) <- as(LSIgr, "character")
     genome(LSIgr) <- g 
