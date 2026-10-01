@@ -1,4 +1,5 @@
 describe("FletchR", {
+  library(ArchR)
   proj <- ArchR::getTestProject()
   proj <- ArchR::addIterativeLSI(
     proj,

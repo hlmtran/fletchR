@@ -18,11 +18,22 @@ The core of the package:
 
     # convert an ArchR project
     library(ArchR)
-    library(fletcheR)
-    proj <- getTestProject()
-    proj <- addIterativeLSI(proj, dimsToUse=1:5, varFeatures=1000, force=TRUE)
-    SCE <- archRtoSCE(proj) 
-
+    library(fletchR)
+    proj <- ArchR::getTestProject()
+    proj <- ArchR::addIterativeLSI(proj, dimsToUse=1:5, varFeatures=1000, force=TRUE)
+    SCE <- fletchR::archRtoSCE(proj) 
+    
+    # Feature Selection from fletchR
+    SCE = fletchR::addIterativeLSI(
+      x = SCE, 
+      name = "test",
+      useMatrix = "counts",
+      preTfIdf = NULL, 
+      binarize = T, 
+      nDimensions = 5,
+      outlierQuantile = c(0,1),
+      varFeatures = 1000)
+    
     # explore it in iSEE
     iSEEarchR(SCE) 
    

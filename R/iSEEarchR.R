@@ -3,6 +3,7 @@
 #' Note that this is a quick and dirty affair so don't expect much. 
 #'
 #' @param x             a SingleCellExperiment with UMAP and LSI reducedDims
+#' @param rdims         reducedDims to view
 #' @param colorColumn   the colData column to color plots ("Clusters")
 #' @param dryRun        just preprocess the data and exit without iSEE? (FALSE)
 #'
@@ -12,13 +13,14 @@
 #'
 #' @export
 #'
-iSEEarchR <- function(x, colorColumn = "Clusters", dryRun=FALSE) { 
+iSEEarchR <- function(x,rdims = NULL ,colorColumn = "Clusters", dryRun=FALSE) { 
 
-  # reason for this will become obvious 
-  stopifnot(c("UMAP","LSI") %in% reducedDimNames(x))
+  # # reason for this will become obvious 
+  # stopifnot(c("UMAP","LSI") %in% reducedDimNames(x))
 
-  # if reducedDim(x) columns aren't already in colData(x), add them
-  rdims <- intersect(c("LSI", "NMF"), reducedDimNames(x))
+  # # if reducedDim(x) columns aren't already in colData(x), add them
+  # rdims <- intersect(c("LSI", "NMF"), reducedDimNames(x))
+  rdims = reducedDimNames(x)
   for (rdim in rdims) x <- .reducedDimsAsColData(x, rdim=rdim)
 
   if (dryRun) {

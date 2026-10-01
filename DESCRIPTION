@@ -10,7 +10,7 @@ Description: ArchR is a glorious package for single-cell chromatin analysis, but
              along with some NMF-related niceties for rapid iteration of 
              collaborative explorations, as when spitballing figures or for QC.
 Version: 0.9
-Date: 2026-08-07
+Date: 2026-10-01
 Authors@R: c(person("Tim", "Triche, Jr.", 
                     role=c("aut", "cre"), 
                     email="trichelab@gmail.com"),
