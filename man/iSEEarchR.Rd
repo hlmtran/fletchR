@@ -4,10 +4,12 @@
 \alias{iSEEarchR}
 \title{convenience wrapper for iSEE on an ArchR-derived singlecellexperiment}
 \usage{
-iSEEarchR(x, colorColumn = "Clusters", dryRun = FALSE)
+iSEEarchR(x, rdims = NULL, colorColumn = "Clusters", dryRun = FALSE)
 }
 \arguments{
 \item{x}{a SingleCellExperiment with UMAP and LSI reducedDims}
+
+\item{rdims}{reducedDims to view}
 
 \item{colorColumn}{the colData column to color plots ("Clusters")}
 
