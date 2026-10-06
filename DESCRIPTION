@@ -9,8 +9,8 @@ Description: ArchR is a glorious package for single-cell chromatin analysis, but
              becomes quite intuitive. archRiSEE bolts together the components 
              along with some NMF-related niceties for rapid iteration of 
              collaborative explorations, as when spitballing figures or for QC.
-Version: 0.9
-Date: 2026-10-01
+Version: 0.9.1
+Date: 2026-10-06
 Authors@R: c(person("Tim", "Triche, Jr.", 
                     role=c("aut", "cre"), 
                     email="trichelab@gmail.com"),
@@ -22,7 +22,7 @@ URL: https://github.com/trichelab/archRiSEE
 BugReports: https://github.com/trichelab/archRiSEE/issues
 License: MIT + file LICENSE
 Depends:
-    R (>= 3.0.0),
+    R (>= 3.5.0),
     RcppML,
     iSEE
 Imports:
