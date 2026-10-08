@@ -78,6 +78,10 @@ seqinfo <- SeqinfoForUCSCGenome(bed_genome)
 shared <- intersect(seqlevels(seqinfo), hdr$seqnames)
 tiles <- tileGenome(seqinfo[shared], tilewidth=50000, cut.last=TRUE)
 system.time(tiles$frags <- countOverlaps(tiles, bed_gr2))
+#    user  system elapsed 
+#   2.890   0.237   3.142 
+
+
 # obviously need to do this by cell barcode, which implies selection, so...
 
 system.time(cells <- unique(bed_tbl$name))
@@ -89,6 +93,8 @@ length(cells)
 
 # this would be a COUNT operation in duckdb obvs
 frags_per_cell <- function(cell, frags) length(which(frags$name == cell))
+
+# this is slow AF 
 system.time(fpc <- sapply(cells, frags_per_cell, frags=bed_tbl))
 
 # write to parquet
@@ -96,10 +102,11 @@ library(nanoparquet)
 stub <- sub("\\.bed\\.gz$", "", bed) 
 bed_pqt <- paste(stub, "parquet", sep=".")
 system.time(write_parquet(bed_tbl, bed_pqt))
+#    user  system elapsed 
+#  11.648   0.166  12.081 
 
 # open with duckdb
 # which takes FOREVER to install btw 
 library(duckdb)
 
 # see https://bwlewis.github.io/duckdb_and_r/ranges/ranges_redux.html
-
