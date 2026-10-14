@@ -44,6 +44,7 @@ featureSelectionLSI = function(x,
                                scaleTo = 10000,
                                seed = 1) {
   stopifnot(depthCol %in% names(SummarizedExperiment::colData(x)))
+  # set.seed(seed)
   LSIres = .firstPass(
     x = x,
     useMatrix = useMatrix,
@@ -56,7 +57,8 @@ featureSelectionLSI = function(x,
     varFeatures = varFeatures,
     totalFeatures = totalFeatures,
     # depthCol = depthCol,
-    scaleTo = scaleTo
+    scaleTo = scaleTo,
+    seed = seed
   )
   
   if (iter <= 1) {
@@ -64,7 +66,10 @@ featureSelectionLSI = function(x,
   }
   
   clusters = clusterSeurat(
-    mat = removeDepthCorrelatedDims(projectedMat = ArchRRowZscores(LSIres$lsi),depth = colData(x)[[depthCol]],corCutOff = corCutOff)
+    mat = removeDepthCorrelatedDims(
+      projectedMat = ArchRRowZscores(SingleCellExperiment::sampleFactors(LSIres)),
+      depth = colData(x)[[depthCol]],
+      corCutOff = corCutOff)
     )
   
   prevLSI = LSIres
@@ -82,11 +87,15 @@ featureSelectionLSI = function(x,
       totalFeatures = totalFeatures,
       # depthCol = depthCol,
       scaleTo = scaleTo,
-      outlierQuantile = outlierQuantile
+      outlierQuantile = outlierQuantile,
+      seed = seed
     )
     
     clusters = clusterSeurat(
-      mat = removeDepthCorrelatedDims(projectedMat = ArchRRowZscores(currentLSI$lsi),depth = colData(x)[[depthCol]],corCutOff = corCutOff)
+      mat = removeDepthCorrelatedDims(
+        projectedMat = ArchRRowZscores(SingleCellExperiment::sampleFactors(currentLSI)),
+        depth = colData(x)[[depthCol]],
+        corCutOff = corCutOff)
     )
     
     if (length(unique(clusters)) == 1) {
@@ -163,22 +172,19 @@ featureSelectionLSI = function(x,
       mat,
       outlierQuantiles = outlierQuantile,
       excludeZeros = TRUE,
-      scaleTo = scaleTo
-    )
+      scaleTo = scaleTo)
     rm(mat)
     gc()
   }
   
   outlierIdx = colnames(tfidfRes$tfidf) %in% tfidfRes$outliers
-  projMat = calcLSI(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx)
-  # projMat = removeDepthCorrelatedDims(projectedMat = projMat, depth = colData(x)[[depthCol]])
+  lem = calcLSI(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx)
+  
+  lem@metadata$selectedFeatures = selectedFeatures
+  lem@metadata$tfidf = tfidfRes
   
   
-  return(list(
-    lsi = projMat,
-    features = selectedFeatures,
-    tfidf = tfidfRes
-  ))
+  return(lem)
 }
 
 #' perform an iterative pass of LSI
@@ -251,14 +257,13 @@ featureSelectionLSI = function(x,
   }
   
   outlierIdx = colnames(tfidfRes$tfidf) %in% tfidfRes$outliers
-  projMat = calcLSI(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx)
-  # projMat = removeDepthCorrelatedDims(projectedMat = projMat, depth = colData(x)[[depthCol]])
+  lem = calcLSI(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx)
   
-  return(list(
-    lsi = projMat,
-    features = selectedFeatures,
-    tfidf = tfidfRes
-  ))
+  lem@metadata$selectedFeatures = selectedFeatures
+  lem@metadata$tfidf = tfidfRes
+  
+  
+  return(lem)
 }
 
 #' retrieve a precomputed TF-IDF matrix

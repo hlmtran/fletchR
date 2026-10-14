@@ -4,7 +4,7 @@
 \alias{calcLSI}
 \title{Core computational engine: Compute LSI on a matrix}
 \usage{
-calcLSI(mat, nDimensions = 30, outliers = NULL, scaleDims = FALSE)
+calcLSI(mat, nDimensions = 30, outliers = NULL)
 }
 \arguments{
 \item{mat}{Feature-by-cell matrix (e.g. TF-IDF).}
@@ -12,11 +12,9 @@ calcLSI(mat, nDimensions = 30, outliers = NULL, scaleDims = FALSE)
 \item{nDimensions}{Number of singular values to calculate.}
 
 \item{outliers}{Logical vector indicating outlier cells to ignore during SVD fitting.}
-
-\item{scaleDims}{Logical; whether to Z-score LSI dimensions across cells.}
 }
 \value{
-A cell-by-dimension projected matrix.
+A list containing cell-by-dimension projected matrix and svd result
 }
 \description{
 Core computational engine: Compute LSI on a matrix
