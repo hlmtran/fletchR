@@ -20,6 +20,7 @@ featureSelectionLSI(
   depthCol = "nFrags",
   scaleTo = 10000,
   method = "SVD",
+  modality = NULL,
   seed = 1
 )
 }
@@ -53,6 +54,8 @@ featureSelectionLSI(
 \item{scaleTo}{scale factor for normalization (10000)}
 
 \item{method}{matrix decomposition method (SVD,NMF)}
+
+\item{modality}{rowData column for modality, NULL if single modality}
 
 \item{seed}{random seed (1)}
 }

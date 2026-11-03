@@ -15,6 +15,7 @@
 #' @param depthCol        colData column holding sequencing depth ("nFrags")
 #' @param scaleTo         scale factor for normalization (10000)
 #' @param method          matrix decomposition method (SVD,NMF)
+#' @param modality        rowData column for modality, NULL if single modality
 #' @param seed            random seed (1)
 #'
 #' @return                list containing LSI, selected features, and TF-IDF result
@@ -44,6 +45,7 @@ featureSelectionLSI = function(x,
                                depthCol = "nFrags",
                                scaleTo = 10000,
                                method = "SVD",
+                               modality = NULL,
                                seed = 1) {
   stopifnot(depthCol %in% names(SummarizedExperiment::colData(x)))
   # set.seed(seed)
@@ -72,7 +74,7 @@ featureSelectionLSI = function(x,
       projectedMat = ArchRRowZscores(SingleCellExperiment::sampleFactors(LSIres)),
       depth = colData(x)[[depthCol]],
       corCutOff = corCutOff)
-    )
+  )
   
   prevLSI = LSIres
   
@@ -172,15 +174,16 @@ featureSelectionLSI = function(x,
     )
   } else{
     mat = mat[rownames(mat) %in% selectedFeatures, ,drop = FALSE]
+    
+    idxOutliers = outlierByQuantile(mat, outlierQuantile, excludeZeros = TRUE)
     tfidfRes <- calcTfIdf(
       mat,
-      outlierQuantiles = outlierQuantile,
-      excludeZeros = TRUE,
+      idxOutliers = idxOutliers,
       scaleTo = scaleTo)
     rm(mat)
     gc()
   }
-  
+  #this part could just take idxOutliers above
   outlierIdx = colnames(tfidfRes$tfidf) %in% tfidfRes$outliers
   if(method =="SVD"){
     lem = calcLSI(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx,seed = seed)
@@ -257,16 +260,16 @@ featureSelectionLSI = function(x,
     )
   } else{
     mat = mat[rownames(mat) %in% selectedFeatures, ,drop = FALSE]
+    
+    idxOutliers = outlierByQuantile(mat, outlierQuantile, excludeZeros = TRUE)
     tfidfRes <- calcTfIdf(
       mat,
-      outlierQuantiles = outlierQuantile,
-      excludeZeros = TRUE,
-      scaleTo = scaleTo
-    )
+      idxOutliers = idxOutliers,
+      scaleTo = scaleTo)
     rm(mat)
     gc()
   }
-  
+  #this part could just take idxOutliers above
   outlierIdx = colnames(tfidfRes$tfidf) %in% tfidfRes$outliers
   if(method =="SVD"){
     lem = calcLSI(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx,seed = seed)
