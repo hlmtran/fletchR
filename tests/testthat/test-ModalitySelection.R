@@ -1,5 +1,26 @@
 library(testthat)
 
+getTestMat = function(){
+  
+  set.seed(123)
+  
+  mat <- Matrix::rsparsematrix(
+    nrow = 60,
+    ncol = 20,
+    density = 0.9
+  )
+  
+  modalities <- rep(
+    c("K4", "DEM", "K27"),
+    times = c(50, 5, 5)
+  )
+  
+  rownames(mat) <- paste0(modalities, "_", seq_len(60))
+  colnames(mat) <- paste0("Cell_", seq_len(20))
+  
+  return(list(mat,modalities))
+}
+
 describe("getModalityRowStartEnd", {
   
   it("returns correct zero-based indices", {
