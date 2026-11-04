@@ -1,0 +1,85 @@
+---
+title: "Untitled"
+author: "Hoang-Le Tran"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
+library(SingleCellExperiment)
+```
+
+```{r}
+# K4_SCE <- readRDS("/varidata/researchtemp/collab/AlexEiken/Le_tran/K4_SCE.rds")
+stacked_sce <- readRDS("/varidata/researchtemp/collab/AlexEiken/Le_tran/stacked_sce.rds")
+
+K4shared = stacked_sce[rowData(stacked_sce)$modality == "K4",]
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+fp = fletchR:::.firstPass(K4shared, binarize = T,totalFeatures = nrow(K4shared))
+projMat = SingleCellExperiment::sampleFactors(fp)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+> system.time({res = apply(
++   projMat,
++   2,
++   function(x) energy::dcor(x, var)
++ )})
+   user  system elapsed 
+157.069  78.707 237.552 
+
+```{r}
+var_dual = as.matrix(colData(K4shared)[,c("nFrags_K4","nFrags_DEM")])
+system.time({res = apply(
+  projMat,
+  2,
+  function(x) energy::dcor(x, var)
+)})
+
+
+#    user  system elapsed 
+# 147.568  78.350 227.675 
+
+
+
+# user  system elapsed 
+#   5.966   2.895   8.969 
+# system.time({res1 = energy::dcor(projMat[,1],K4shared$nFrags_K4)})
+```
+
+```{r}
+projMat2 = fletchR::ArchRRowZscores(projMat)
+
+system.time({res_dual = apply(
+  projMat2,
+  2,
+  function(x) energy::dcor(x, var)
+)})
+```
+
+```{r}
+var_k4 = as.matrix(colData(K4shared)[,c("nFrags_K4")])
+abs(cor(projMat,var_k4))
+abs(cor(projMat2, var_k4))
+```
+
+```{r}
+var_DEM = as.matrix(colData(K4shared)[,c("nFrags_DEM")])
+abs(cor(projMat,var_DEM))
+z = abs(cor(projMat2, var_DEM))
+```

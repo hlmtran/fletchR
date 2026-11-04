@@ -34,30 +34,31 @@
 #'
 #' @export
 addTfIdf <- function(x, 
-  useMatrix=c("counts","TileMatrix"), 
-  excludeChr=c("chrM","chrX","chrY"), 
-  subsetLSI=FALSE, 
-  binarize=TRUE, 
-  outlierQuantiles=c(0.02, 0.98),
-  scaleTo=10000,   
-  assayName="TfIdf",
-  ...) { 
-
+                     useMatrix=c("counts","TileMatrix"), 
+                     excludeChr=c("chrM","chrX","chrY"), 
+                     subsetLSI=FALSE, 
+                     binarize=TRUE, 
+                     outlierQuantiles=c(0.02, 0.98),
+                     scaleTo=10000,   
+                     assayName="TfIdf",
+                     ...) { 
+  
   if (is(x, "SummarizedExperiment")) {
     # useMatrix <- match.arg(useMatrix)
     mat <- filterAndGetMat(x=x, useMatrix=useMatrix, excludeChr=excludeChr,binarize=binarize, 
                            subsetLSI=subsetLSI)
   }
-
-  res <- calcTfIdf(mat, outlierQuantiles=outlierQuantiles, excludeZeros=TRUE, scaleTo=scaleTo)
-
+  
+  idxOutliers = outlierByQuantile(mat, outlierQuantiles, excludeZeros = TRUE)
+  res <- calcTfIdf(mat, idxOutliers = idxOutliers, scaleTo=scaleTo)
+  
   message("Adding ", assayName, " to assays...")
   assay(x,assayName) <- res[["tfidf"]] #logTFIDF(tf=mat,idf=idfMat , ...)
   metadata(x)[[assayName]] <- list(
     idf = res[["idf"]],
     outliers = res[["outliers"]] 
   )
-
+  
   return(x)
 }
 
