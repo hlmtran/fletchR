@@ -26,6 +26,18 @@ scaleModalities = function(mat,modalities,method = "Frobenius"){
   return(mat)
 }
 
+#' Extract modality labels from row names
+#'
+#' Extracts modality labels following "_m" at the end of each row name.
+#'
+#' @param v Character vector of row names containing "_m" followed by a modality.
+#'
+#' @return Character vector of modality labels.
+getModality = function(v) {
+  stopifnot(all(grepl("_m[^_]+$", v)))
+  sub(".*_m([^_]+)$", "\\1", v)
+}
+
 #' Get modality row boundaries
 #'
 #' Computes zero-based, row boundaries for consecutive modality blocks.

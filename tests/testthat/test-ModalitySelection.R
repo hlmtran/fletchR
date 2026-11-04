@@ -92,3 +92,30 @@ describe("getSparseIndices", {
   })
 })
 
+describe("getModality", {
+  
+  it("extracts modality labels after _m", {
+    
+    v = c(
+      "feature_1_some_name_mK4",
+      "feature_2_mDEM",
+      "feature_3_another_name_mK27"
+    )
+    
+    expected = c("K4", "DEM", "K27")
+    
+    result = getModality(v = v)
+    
+    expect_equal(result, expected)
+  })
+  
+  it("rejects row names without a modality delimiter", {
+    
+    v = c("feature_1_K4", "feature_2_mDEM")
+    
+    expect_error(
+      getModality(v = v)
+    )
+  })
+  
+})

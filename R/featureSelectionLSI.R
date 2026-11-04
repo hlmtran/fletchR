@@ -13,12 +13,17 @@
 #' @param varFeatures     number of variable features to select (25000)
 #' @param totalFeatures   number of features considered for feature selection (500000)
 #' @param depthCol        colData column holding sequencing depth ("nFrags")
+#' @param outlierCellsCol Name of a logical colData column containing
+#'                       outlier flags, such as those from detectOutliers().
+#'                       NULL uses quantile-based outlier detection.
+#' @param outlierCellsCol colData column indicating outlier cells
 #' @param scaleTo         scale factor for normalization (10000)
 #' @param method          matrix decomposition method (SVD,NMF)
-#' @param modality        rowData column for modality, NULL if single modality
+#' @param multimodal      Logical indicating multimodal data.
+#' @param scaleMethod     Modality scaling method ("Frobenius" or "minMax").
 #' @param seed            random seed (1)
 #'
-#' @return                list containing LSI, selected features, and TF-IDF result
+#' @return                LEM containing reduced dims, selected features, and TF-IDF result.
 #'
 #' @details               Performs iterative LSI following the ArchR approach:
 #'                        LSI, clustering, variable feature selection, and repeated LSI.
@@ -43,11 +48,25 @@ featureSelectionLSI = function(x,
                                varFeatures = 25000,
                                totalFeatures = 500000,
                                depthCol = "nFrags",
+                               outlierCellsCol = NULL,
                                scaleTo = 10000,
                                method = "SVD",
-                               modality = NULL,
+                               multimodal = FALSE,
+                               scaleMethod = "Frobenius",
                                seed = 1) {
   stopifnot(depthCol %in% names(SummarizedExperiment::colData(x)))
+  if (multimodal) {
+    stopifnot(
+      "Your row names must contain modality suffix: _m[modality]" = 
+      all(grepl("_m[^_]+$", rownames(x))))
+    
+    stopifnot(
+      "Modalities must occur in consecutive blocks." =
+        anyDuplicated(rle(getModality(v = rownames(x)))$values) == 0L
+    )
+  }
+  if(!is.null(outlierCellsCol)){stopifnot(outlierCellsCol %in% colnames(colData(x)))}
+  
   # set.seed(seed)
   LSIres = .firstPass(
     x = x,
@@ -60,8 +79,11 @@ featureSelectionLSI = function(x,
     outlierQuantile = outlierQuantile,
     varFeatures = varFeatures,
     totalFeatures = totalFeatures,
+    outlierCellsCol = outlierCellsCol,
     scaleTo = scaleTo,
     method = method,
+    multimodal = multimodal,
+    scaleMethod = scaleMethod,
     seed = seed
   )
   
@@ -89,9 +111,12 @@ featureSelectionLSI = function(x,
       nDimensions = nDimensions,
       varFeatures = varFeatures,
       totalFeatures = totalFeatures,
+      outlierCellsCol = outlierCellsCol,
       scaleTo = scaleTo,
       outlierQuantile = outlierQuantile,
       method = method,
+      multimodal = multimodal,
+      scaleMethod=scaleMethod,
       seed = seed
     )
     
@@ -126,12 +151,16 @@ featureSelectionLSI = function(x,
 #' @param outlierQuantile quantiles for excluding depth outliers during LSI
 #' @param varFeatures     number of variable features to select (25000)
 #' @param totalFeatures   number of features considered for feature selection (500000)
-#' @param depthCol        colData column holding sequencing depth ("nFrags")
+#' @param outlierCellsCol Name of a logical colData column containing
+#'                       outlier flags, such as those from detectOutliers().
+#'                       NULL uses quantile-based outlier detection.
 #' @param scaleTo         scale factor for TF-IDF normalization (10000)
 #' @param method          matrix decomposition method (SVD,NMF)
+#' @param multimodal      Logical indicating multimodal data.
+#' @param scaleMethod     Modality scaling method ("Frobenius" or "minMax").
 #' @param seed            random seed (1)
 #'
-#' @return                list containing LSI, selected features, and TF-IDF result
+#' @return                LEM containing reduced dims, selected features, and TF-IDF result.
 #'
 #' @keywords internal
 .firstPass = function(x,
@@ -144,11 +173,16 @@ featureSelectionLSI = function(x,
                       outlierQuantile = c(0.02, 0.98),
                       varFeatures = 25000,
                       totalFeatures = 500000,
-                      depthCol = "nFrags",
+                      outlierCellsCol = NULL,
                       scaleTo = 10000,
                       method = "SVD",
+                      multimodal = FALSE,
+                      scaleMethod = "Frobenius",
                       seed = 1) {
   set.seed(seed)
+  
+  if(!is.null(outlierCellsCol)){stopifnot(outlierCellsCol %in% colnames(colData(x)))}
+  
   mat = filterAndGetMat(
     x = x,
     useMatrix = useMatrix,
@@ -175,13 +209,24 @@ featureSelectionLSI = function(x,
   } else{
     mat = mat[rownames(mat) %in% selectedFeatures, ,drop = FALSE]
     
-    idxOutliers = outlierByQuantile(mat, outlierQuantile, excludeZeros = TRUE)
+    if(is.null(outlierCellsCol)){
+      idxOutliers = outlierByQuantile(mat, outlierQuantile, excludeZeros = TRUE)
+    } else {
+      idxOutliers = x[[outlierCellsCol]]
+    }
+    
     tfidfRes <- calcTfIdf(
       mat,
       idxOutliers = idxOutliers,
       scaleTo = scaleTo)
     rm(mat)
     gc()
+  }
+  if(multimodal){
+    tfidfRes$tfidf = scaleModalities(
+      mat = tfidfRes$tfidf,
+      modalities = getModality(v = rownames(tfidfRes$tfidf)),
+      method = scaleMethod)
   }
   #this part could just take idxOutliers above
   outlierIdx = colnames(tfidfRes$tfidf) %in% tfidfRes$outliers
@@ -211,11 +256,16 @@ featureSelectionLSI = function(x,
 #' @param outlierQuantile quantiles for excluding depth outliers during LSI
 #' @param varFeatures     number of variable features to select (25000)
 #' @param totalFeatures   number of features considered for feature selection (500000)
+#' @param outlierCellsCol Name of a logical colData column containing
+#'                       outlier flags, such as those from detectOutliers().
+#'                       NULL uses quantile-based outlier detection.
 #' @param scaleTo         scale factor for normalization (10000)
 #' @param method          matrix decomposition method (SVD,NMF)
+#' @param multimodal      Logical indicating multimodal data.
+#' @param scaleMethod     Modality scaling method ("Frobenius" or "minMax").
 #' @param seed            random seed (1)
 #'
-#' @return                list containing LSI, selected features, and TF-IDF result
+#' @return                LEM containing reduced dims, selected features, and TF-IDF result.
 #'
 #' @keywords internal
 .iterativePass = function(x,
@@ -228,11 +278,14 @@ featureSelectionLSI = function(x,
                           outlierQuantile = c(0.02, 0.98),
                           varFeatures = 25000,
                           totalFeatures = 500000,
-                          # depthCol = "nFrags",
+                          outlierCellsCol = NULL,
                           scaleTo = 10000,
                           method = "SVD",
+                          multimodal = FALSE,
+                          scaleMethod = "Frobenius",
                           seed = 1) {
   set.seed(seed)
+  if(!is.null(outlierCellsCol)){stopifnot(outlierCellsCol %in% colnames(colData(x)))}
   mat = filterAndGetMat(
     x = x,
     useMatrix = useMatrix,
@@ -261,13 +314,24 @@ featureSelectionLSI = function(x,
   } else{
     mat = mat[rownames(mat) %in% selectedFeatures, ,drop = FALSE]
     
-    idxOutliers = outlierByQuantile(mat, outlierQuantile, excludeZeros = TRUE)
+    if(is.null(outlierCellsCol)){
+      idxOutliers = outlierByQuantile(mat, outlierQuantile, excludeZeros = TRUE)
+    } else {
+      idxOutliers = x[[outlierCellsCol]]
+    }
+    
     tfidfRes <- calcTfIdf(
       mat,
       idxOutliers = idxOutliers,
       scaleTo = scaleTo)
     rm(mat)
     gc()
+  }
+  if(multimodal){
+    tfidfRes$tfidf = scaleModalities(
+      mat = tfidfRes$tfidf,
+      modalities = getModality(v = rownames(tfidfRes$tfidf)),
+      method = scaleMethod)
   }
   #this part could just take idxOutliers above
   outlierIdx = colnames(tfidfRes$tfidf) %in% tfidfRes$outliers
@@ -314,6 +378,8 @@ featureSelectionLSI = function(x,
   )
   return(tfidfRes)
 }
+
+
 # testCorrelation <- function(pCheck, pCheck2) {
 #   lapply(seq_len(ncol(pCheck)), function(x) {
 #     cor(pCheck[, x], pCheck2[, x])

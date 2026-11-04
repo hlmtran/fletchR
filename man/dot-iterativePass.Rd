@@ -15,8 +15,11 @@
   outlierQuantile = c(0.02, 0.98),
   varFeatures = 25000,
   totalFeatures = 5e+05,
+  outlierCellsCol = NULL,
   scaleTo = 10000,
   method = "SVD",
+  multimodal = FALSE,
+  scaleMethod = "Frobenius",
   seed = 1
 )
 }
@@ -41,14 +44,22 @@
 
 \item{totalFeatures}{number of features considered for feature selection (500000)}
 
+\item{outlierCellsCol}{Name of a logical colData column containing
+outlier flags, such as those from detectOutliers().
+NULL uses quantile-based outlier detection.}
+
 \item{scaleTo}{scale factor for normalization (10000)}
 
 \item{method}{matrix decomposition method (SVD,NMF)}
 
+\item{multimodal}{Logical indicating multimodal data.}
+
+\item{scaleMethod}{Modality scaling method ("Frobenius" or "minMax").}
+
 \item{seed}{random seed (1)}
 }
 \value{
-\if{html}{\out{<div class="sourceCode">}}\preformatted{           list containing LSI, selected features, and TF-IDF result
+\if{html}{\out{<div class="sourceCode">}}\preformatted{           LEM containing reduced dims, selected features, and TF-IDF result.
 }\if{html}{\out{</div>}}
 }
 \description{
