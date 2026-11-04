@@ -54,7 +54,7 @@ featureSelectionLSI = function(x,
                                multimodal = FALSE,
                                scaleMethod = "Frobenius",
                                seed = 1) {
-  stopifnot(depthCol %in% names(SummarizedExperiment::colData(x)))
+  stopifnot(all(depthCol %in% colnames(SummarizedExperiment::colData(x))))
   if (multimodal) {
     stopifnot(
       "Your row names must contain modality suffix: _m[modality]" = 
@@ -94,7 +94,7 @@ featureSelectionLSI = function(x,
   clusters = clusterSeurat(
     mat = removeDepthCorrelatedDims(
       projectedMat = ArchRRowZscores(SingleCellExperiment::sampleFactors(LSIres)),
-      depth = colData(x)[[depthCol]],
+      depth = colData(x)[,depthCol],
       corCutOff = corCutOff)
   )
   
@@ -123,7 +123,7 @@ featureSelectionLSI = function(x,
     clusters = clusterSeurat(
       mat = removeDepthCorrelatedDims(
         projectedMat = ArchRRowZscores(SingleCellExperiment::sampleFactors(currentLSI)),
-        depth = colData(x)[[depthCol]],
+        depth = colData(x)[,depthCol],
         corCutOff = corCutOff)
     )
     

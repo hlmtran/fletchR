@@ -64,7 +64,9 @@ import(scuttle)
 import(sparseMatrixStats)
 import(uwot)
 importFrom(SummarizedExperiment,colData)
+importFrom(energy,dcor)
 importFrom(stats,
+  cor,
   cov,
   mahalanobis,
   qchisq,
