@@ -6,6 +6,7 @@
 #' @param cols Columns used for outlier detection.
 #' @param FN Column transformation function.
 #' @param quantile_cutoff Chi-squared quantile threshold.
+#' @param outlierColname colData name to save.
 #'
 #' @return SingleCellExperiment object with an `outliers` column.
 #'
@@ -13,16 +14,20 @@
 detectOutliers = function(sce,
                           cols = c("nFrags_DEM", "nFrags_K4"),
                           FN = normit,
-                          quantile_cutoff = 0.95) {
+                          quantile_cutoff = 0.95,
+                          outlierColname = "outliers") {
   
-  variables = getVariables(sce, cols, FN)
+  variables = getVariables(sce, cols)
+  
+  if(!is.null(FN)){  variables = apply(variables, 2, FN)}
   
   outliers = detectMahalanobisOutliers(
     mat = variables,
     quantile_cutoff = quantile_cutoff
   )
   
-  sce$outliers = outliers
+  stopifnot(identical(rownames(variables),names(outliers)))
+  sce[[outlierColname]] = outliers
   
   return(sce)
 }
@@ -34,36 +39,29 @@ detectOutliers = function(sce,
 #'
 #' @param sce SingleCellExperiment object.
 #' @param cols Columns to extract.
-#' @param FN Column transformation function.
 #'
 #' @return Matrix of transformed variables.
 #'
 #' @importFrom SummarizedExperiment colData
-getVariables = function(sce,
-                        cols = c("nFrags_DEM", "nFrags_K4"),
-                        FN = normit) {
-  
+getVariables = function(sce, cols = c("nFrags_DEM", "nFrags_K4")) {
   stopifnot(
     is.character(cols),
-    length(cols) >= 1,
-    !anyNA(cols),
-    !anyDuplicated(cols),
-    all(cols %in% colnames(colData(sce))),
-    is.function(FN)
+    length(cols) >= 1,!anyNA(cols),!anyDuplicated(cols),
+    all(cols %in% colnames(colData(sce)))
   )
+  if (length(cols) == 1) {
+    warning("Only 1 variable detected. This test is not robust to low end outliers in 1 dimension")
+  }
+  variables = colData(sce)
+  variables = variables[, cols, drop = FALSE]
   
-  nfrags_mat = colData(sce)
-  nfrags_mat = nfrags_mat[, cols, drop = FALSE]
+  stopifnot(all(vapply(variables, is.numeric, logical(1))))
   
-  stopifnot(all(vapply(nfrags_mat, is.numeric, logical(1))))
-  
-  nfrags_mat = apply(nfrags_mat, 2, FN)
-  
-  return(nfrags_mat)
+  return(variables)
 }
 
 
-#' Continuity-corrected inverse normal transformation
+#' Rank-based inverse normal transformation
 #'
 #' Applies a rank-based inverse normal transformation.
 #'
@@ -119,4 +117,67 @@ detectMahalanobisOutliers = function(mat, quantile_cutoff = 0.95) {
   outliers = D2 > cutoff
   
   return(outliers)
+}
+
+plotOutliers <- function(
+    sceObj,
+    dataCols = c("nFrags_K4", "nFrags_DEM"),
+    outlierColname = "outliers",
+    FN = normit,
+    ...
+) {
+  
+  stopifnot(length(dataCols) == 2L)
+  stopifnot(outlierColname %in% colnames(colData(sceObj)))
+  
+  # Extract and transform data
+  x <- FN(sceObj[[dataCols[1]]])
+  y <- FN(sceObj[[dataCols[2]]])
+  
+  # Shared axis limits based on all cells
+  xlim <- range(x, finite = TRUE)
+  ylim <- range(y, finite = TRUE)
+  
+  # Identify valid cells
+  idx <- is.finite(x) & is.finite(y)
+  
+  # Identify non-outlier cells
+  idxNoOutliers <- idx &
+    !is.na(sceObj[[outlierColname]]) &
+    !sceObj[[outlierColname]]
+  
+  # Enable plot recording
+  grDevices::dev.control(displaylist = "enable")
+  
+  # Plot all cells
+  graphics::smoothScatter(
+    x[idx], y[idx],
+    xlim = xlim,
+    ylim = ylim,
+    xlab = dataCols[1],
+    ylab = dataCols[2],
+    main = "All cells",
+    ...
+  )
+  
+  pAll <- grDevices::recordPlot()
+  
+  # Plot without outliers
+  graphics::smoothScatter(
+    x[idxNoOutliers], y[idxNoOutliers],
+    xlim = xlim,
+    ylim = ylim,
+    xlab = dataCols[1],
+    ylab = dataCols[2],
+    main = "Without outliers",
+    nrpoints = 0,
+    ...
+  )
+  
+  pFiltered <- grDevices::recordPlot()
+  
+  return(list(
+    all = pAll,
+    filtered = pFiltered
+  ))
 }

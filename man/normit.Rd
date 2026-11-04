@@ -2,7 +2,7 @@
 % Please edit documentation in R/multivariate_outlier_detection.R
 \name{normit}
 \alias{normit}
-\title{Continuity-corrected inverse normal transformation}
+\title{Rank-based inverse normal transformation}
 \usage{
 normit(x)
 }

@@ -8,7 +8,8 @@ detectOutliers(
   sce,
   cols = c("nFrags_DEM", "nFrags_K4"),
   FN = normit,
-  quantile_cutoff = 0.95
+  quantile_cutoff = 0.95,
+  outlierColname = "outliers"
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ detectOutliers(
 \item{FN}{Column transformation function.}
 
 \item{quantile_cutoff}{Chi-squared quantile threshold.}
+
+\item{outlierColname}{colData name to save.}
 }
 \value{
 SingleCellExperiment object with an \code{outliers} column.

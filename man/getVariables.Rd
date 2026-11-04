@@ -4,14 +4,12 @@
 \alias{getVariables}
 \title{Extract and transform variables}
 \usage{
-getVariables(sce, cols = c("nFrags_DEM", "nFrags_K4"), FN = normit)
+getVariables(sce, cols = c("nFrags_DEM", "nFrags_K4"))
 }
 \arguments{
 \item{sce}{SingleCellExperiment object.}
 
 \item{cols}{Columns to extract.}
-
-\item{FN}{Column transformation function.}
 }
 \value{
 Matrix of transformed variables.
