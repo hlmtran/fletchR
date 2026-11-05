@@ -378,6 +378,14 @@ dbGetQuery(con, "SELECT * FROM tiles_50kb_hg38 LIMIT 6")
 # 6  chr1 250001 300000
 #
 
+#### THIS IS THE IMPORTANT STUFF 
+####
+#### fragmentsToParquet already handles ingestion & indexing
+####
+#### optimizing blacklisted counting is the real trick here 
+####
+
+
 # index this 
 dbGetQuery(con, "SELECT duckhts_cgranges_create('tiles_50kb_hg38_idx')")
 #   duckhts_cgranges_create('tiles_50kb_hg38_idx')

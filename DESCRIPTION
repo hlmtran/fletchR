@@ -11,7 +11,7 @@ Description: ArchR is great for single-cell chromatin analysis, but its design,
              to handle assays where a single DNA fragment can carry information
              about multiple different assays (proteins, chromatin modifications,
              transcription, DNA methylation, etc.) and jointly model the result.
-Version: 0.50.2
+Version: 0.50.3
 Date: 2026-11-05
 Authors@R: c(person("Tim", "Triche, Jr.", 
                     role=c("aut", "cre"), 
@@ -37,6 +37,7 @@ Imports:
     scuttle,
     bluster,
     Matrix,
+    energy,
     irlba,
     uwot,
     igvR,
