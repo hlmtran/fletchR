@@ -53,10 +53,10 @@ fragmentsToParquet <- function(bed, con=NULL, parquet=NULL, region=NULL, ...) {
 
     # check
     if (file.exists(parquet)) {
-      message("Success: ", parquet, " written to disk.")
+      message(parquet, " written to disk.")
       return(TRUE)
     } else {
-      message("Failure: ", parquet, " was not written to disk.")
+      message("ERROR: ", parquet, " was not written to disk.")
       return(FALSE)
     }
 

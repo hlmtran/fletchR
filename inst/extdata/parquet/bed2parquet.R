@@ -385,6 +385,16 @@ dbGetQuery(con, "SELECT * FROM tiles_50kb_hg38 LIMIT 6")
 #### optimizing blacklisted counting is the real trick here 
 ####
 
+# convert all non-converted fragment files to parquet:
+#
+library(fletchR) 
+packageVersion("fletchR")
+# [1] '0.50.2'
+
+sapply(bf$filename, fragmentsToParquet)
+# AE_Hs_5Leuk_Ms_H3K27me3_H19_Rb_DEM_PA1241_112525.parquet written to disk.
+# ...
+
 
 # index this 
 dbGetQuery(con, "SELECT duckhts_cgranges_create('tiles_50kb_hg38_idx')")
