@@ -20,6 +20,7 @@ export(checkProjection)
 export(clusterSeurat)
 export(colUnitScale)
 export(colZscores)
+export(detectOutliers)
 export(downsample)
 export(featureSelectionLSI)
 export(fragmentsToParquet)
@@ -62,3 +63,12 @@ import(irlba)
 import(scuttle)
 import(sparseMatrixStats)
 import(uwot)
+importFrom(SummarizedExperiment,colData)
+importFrom(energy,dcor)
+importFrom(stats,
+  cor,
+  cov,
+  mahalanobis,
+  qchisq,
+  qnorm
+)

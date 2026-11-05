@@ -18,8 +18,11 @@ featureSelectionLSI(
   varFeatures = 25000,
   totalFeatures = 5e+05,
   depthCol = "nFrags",
+  outlierCellsCol = NULL,
   scaleTo = 10000,
   method = "SVD",
+  multimodal = FALSE,
+  scaleMethod = "Frobenius",
   seed = 1
 )
 }
@@ -50,14 +53,20 @@ featureSelectionLSI(
 
 \item{depthCol}{colData column holding sequencing depth ("nFrags")}
 
+\item{outlierCellsCol}{colData column indicating outlier cells}
+
 \item{scaleTo}{scale factor for normalization (10000)}
 
 \item{method}{matrix decomposition method (SVD,NMF)}
 
+\item{multimodal}{Logical indicating multimodal data.}
+
+\item{scaleMethod}{Modality scaling method ("Frobenius" or "minMax").}
+
 \item{seed}{random seed (1)}
 }
 \value{
-\if{html}{\out{<div class="sourceCode">}}\preformatted{           list containing LSI, selected features, and TF-IDF result
+\if{html}{\out{<div class="sourceCode">}}\preformatted{           LEM containing reduced dims, selected features, and TF-IDF result.
 }\if{html}{\out{</div>}}
 }
 \description{

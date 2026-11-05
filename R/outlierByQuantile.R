@@ -11,7 +11,7 @@
 #' @export
 #'
 outlierByQuantile <- function(mat, quantiles=c(0.02, 0.98),excludeZeros = TRUE) {
-
+  
   #from ArchR
   stopifnot(inherits(mat, "Matrix"))
   if (length(quantiles) != 2 ||
@@ -19,16 +19,23 @@ outlierByQuantile <- function(mat, quantiles=c(0.02, 0.98),excludeZeros = TRUE) 
       any(quantiles > 1)) {
     stop("quantiles must contain two values between 0 and 1.")
   }
-
+  
   colSm <- colSums(mat)
   
-  if(excludeZeros){
-    toTest = colSm[colSm > 0]
-  } else {
-    toTest = colSm 
-  }
-  thresholds <- stats::quantile(toTest, probs=sort(quantiles), names=FALSE)
-  idxOutlier <- (colSm <= thresholds[1] | colSm >= thresholds[2])
+  idxOutlier = detectQuantileOutliers(v = colSm,quantiles = quantiles,excludeZeros=excludeZeros)
   return(idxOutlier)
+  
+}
 
+detectQuantileOutliers = function(v,quantiles,excludeZeros = TRUE,names=FALSE){
+  if(excludeZeros){
+    toTest = v[v > 0]
+  } else {
+    toTest = v 
+  }
+  thresholds <- stats::quantile(toTest, probs=sort(quantiles), names=names)
+  idxOutlier <- (v <= thresholds[1] | v >= thresholds[2])
+  
+  if(excludeZeros){idxOutlier[v == 0] = FALSE }
+  return(idxOutlier)
 }
