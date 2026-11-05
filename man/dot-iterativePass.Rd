@@ -20,7 +20,8 @@
   method = "SVD",
   multimodal = FALSE,
   scaleMethod = "Frobenius",
-  seed = 1
+  seed = 1,
+  ...
 )
 }
 \arguments{

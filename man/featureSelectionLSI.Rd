@@ -23,7 +23,9 @@ featureSelectionLSI(
   method = "SVD",
   multimodal = FALSE,
   scaleMethod = "Frobenius",
-  seed = 1
+  balanceFirstSelection = T,
+  seed = 1,
+  ...
 )
 }
 \arguments{

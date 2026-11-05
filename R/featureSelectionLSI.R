@@ -53,11 +53,13 @@ featureSelectionLSI = function(x,
                                method = "SVD",
                                multimodal = FALSE,
                                scaleMethod = "Frobenius",
-                               seed = 1) {
+                               balanceFirstSelection=T,
+                               seed = 1,...) {
   stopifnot(all(depthCol %in% colnames(SummarizedExperiment::colData(x))))
+  
   if (multimodal) {
     stopifnot(
-      "Your row names must contain modality suffix: _m[modality]" = 
+      "Multimodal selected: your row names must contain modality suffix: _m[modality]" = 
       all(grepl("_m[^_]+$", rownames(x))))
     
     stopifnot(
@@ -84,7 +86,9 @@ featureSelectionLSI = function(x,
     method = method,
     multimodal = multimodal,
     scaleMethod = scaleMethod,
-    seed = seed
+    balance = balanceFirstSelection,
+    seed = seed,
+    ...
   )
   
   if (iter <= 1) {
@@ -117,7 +121,8 @@ featureSelectionLSI = function(x,
       method = method,
       multimodal = multimodal,
       scaleMethod=scaleMethod,
-      seed = seed
+      seed = seed,
+      ...
     )
     
     clusters = clusterSeurat(
@@ -178,7 +183,9 @@ featureSelectionLSI = function(x,
                       method = "SVD",
                       multimodal = FALSE,
                       scaleMethod = "Frobenius",
-                      seed = 1) {
+                      balance = T,
+                      seed = 1,
+                      ...) {
   set.seed(seed)
   
   if(!is.null(outlierCellsCol)){stopifnot(outlierCellsCol %in% colnames(colData(x)))}
@@ -194,7 +201,8 @@ featureSelectionLSI = function(x,
     mat,
     filterQuantile = filterQuantile,
     varFeatures = varFeatures,
-    totalFeatures = totalFeatures
+    totalFeatures = totalFeatures,
+    balance = balance
   )
   if (!is.null(preTfIdf)) {
     rm(mat)
@@ -231,9 +239,9 @@ featureSelectionLSI = function(x,
   #this part could just take idxOutliers above
   outlierIdx = colnames(tfidfRes$tfidf) %in% tfidfRes$outliers
   if(method =="SVD"){
-    lem = calcLSI(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx,seed = seed)
+    lem = calcLSI(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx,seed = seed,...)
   }else if(method == "NMF"){
-    lem = calcNMF(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx,seed = seed)
+    lem = calcNMF(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx,seed = seed,...)
   }else{
     stop("Invalid Method. Choose SVD or NMF")
   }
@@ -283,7 +291,8 @@ featureSelectionLSI = function(x,
                           method = "SVD",
                           multimodal = FALSE,
                           scaleMethod = "Frobenius",
-                          seed = 1) {
+                          seed = 1,
+                          ...) {
   set.seed(seed)
   if(!is.null(outlierCellsCol)){stopifnot(outlierCellsCol %in% colnames(colData(x)))}
   mat = filterAndGetMat(
@@ -336,9 +345,9 @@ featureSelectionLSI = function(x,
   #this part could just take idxOutliers above
   outlierIdx = colnames(tfidfRes$tfidf) %in% tfidfRes$outliers
   if(method =="SVD"){
-    lem = calcLSI(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx,seed = seed)
+    lem = calcLSI(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx,seed = seed,...)
   }else if(method == "NMF"){
-    lem = calcNMF(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx,seed = seed)
+    lem = calcNMF(mat=tfidfRes$tfidf,nDimensions=nDimensions,outliers=outlierIdx,seed = seed,...)
   }else{
     stop("Invalid Method. Choose SVD or NMF")
   }

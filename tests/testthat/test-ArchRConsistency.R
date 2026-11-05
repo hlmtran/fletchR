@@ -1,3 +1,9 @@
+#sometimes the clustering will fail and breaking all subsequent steps. 
+#This is due to sign flips and seed state. Most of the time restarting 
+#the session will be sufficient to fix this. Make sure irlba is at 2.3.7
+#In the future, projected mat should be tested with absolute value to remove 
+#sign flip ambiguity and replace clustering results with true results in testthat/testdata
+
 describe("FletchR", {
   library(ArchR)
   proj <- ArchR::getTestProject()
@@ -80,7 +86,7 @@ describe("FletchR", {
     x = SCE,
     useMatrix = "counts",
     preTfIdf = NULL,
-    clusters = clustF, # passing true results to make sure the second test works
+    clusters = clustF, 
     binarize = T,
     # excludeChr = excludeChr,
     nDimensions = 5,
