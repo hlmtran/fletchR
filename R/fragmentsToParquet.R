@@ -25,35 +25,41 @@ fragmentsToParquet <- function(bed, con=NULL, parquet=NULL, region=NULL, ...) {
   tabixed <- (file.exists(paste0(bed, ".tbi"))|file.exists(paste0(bed, ".csi")))
   if (!tabixed) stop("Your fragment (BED) file must be tabix-indexed.") 
   if (is.null(parquet)) parquet <- sub("\\.(bed|tsv)(.gz)?", ".parquet", bed)
-  if (file.exists(parquet)) stop(paste(parquet, "already exists!"))
 
-  newcon <- is.null(con)
-  if (newcon) con <- rduckhts_connect(...)
-  rduckhts_tabix_convert_parquet(
-    con = con,
-    path = bed,
-    output = parquet, 
-    header_names = c("chrom",
-                     "start",
-                     "end",
-                     "name"),
-    column_types = c("VARCHAR",
-                     "BIGINT",
-                     "BIGINT",
-                     "VARCHAR"),
-    compression = "zstd"
-  )
-
-  # shut down the connection if we spawned one for this
-  if (newcon) DBI::dbDisconnect(con, shutdown = TRUE)
-
-  # check for results
   if (file.exists(parquet)) {
-    message("Success: ", parquet, " written to disk.")
+
+    message(parquet, " already exists! Skipping.")
     return(TRUE)
-  } else {
-    message("Failure: ", parquet, " written to disk.")
-    return(FALSE)
+
+  } else { 
+
+    newcon <- is.null(con)
+    if (newcon) con <- rduckhts_connect(...)
+    rduckhts_tabix_convert_parquet(
+      con = con,
+      path = bed,
+      output = parquet, 
+      header_names = c("chrom",
+                       "start",
+                       "end",
+                       "name"),
+      column_types = c("VARCHAR",
+                       "BIGINT",
+                       "BIGINT",
+                       "VARCHAR"),
+      compression = "zstd"
+    )
+    if (newcon) DBI::dbDisconnect(con, shutdown = TRUE)
+
+    # check
+    if (file.exists(parquet)) {
+      message("Success: ", parquet, " written to disk.")
+      return(TRUE)
+    } else {
+      message("Failure: ", parquet, " was not written to disk.")
+      return(FALSE)
+    }
+
   }
 
 }
