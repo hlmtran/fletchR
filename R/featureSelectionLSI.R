@@ -21,6 +21,8 @@
 #' @param method          matrix decomposition method (SVD,NMF)
 #' @param multimodal      Logical indicating multimodal data.
 #' @param scaleMethod     Modality scaling method ("Frobenius" or "minMax").
+#' @param balanceFirstSelection Logical to balance Features in first pass of feature selection
+#' @param balanceIterativeSelection Logical to balance Features in iterative pass of feature selection
 #' @param seed            random seed (1)
 #'
 #' @return                LEM containing reduced dims, selected features, and TF-IDF result.
@@ -53,7 +55,8 @@ featureSelectionLSI = function(x,
                                method = "SVD",
                                multimodal = FALSE,
                                scaleMethod = "Frobenius",
-                               balanceFirstSelection=T,
+                               balanceFirstSelection=FALSE,
+                               balanceIterativeSelection = FALSE,
                                seed = 1,...) {
   stopifnot(all(depthCol %in% colnames(SummarizedExperiment::colData(x))))
   
@@ -121,6 +124,7 @@ featureSelectionLSI = function(x,
       method = method,
       multimodal = multimodal,
       scaleMethod=scaleMethod,
+      balance = balanceIterativeSelection,
       seed = seed,
       ...
     )
@@ -183,7 +187,7 @@ featureSelectionLSI = function(x,
                       method = "SVD",
                       multimodal = FALSE,
                       scaleMethod = "Frobenius",
-                      balance = T,
+                      balance = FALSE,
                       seed = 1,
                       ...) {
   set.seed(seed)
@@ -291,6 +295,7 @@ featureSelectionLSI = function(x,
                           method = "SVD",
                           multimodal = FALSE,
                           scaleMethod = "Frobenius",
+                          balance = FALSE,
                           seed = 1,
                           ...) {
   set.seed(seed)
@@ -306,6 +311,7 @@ featureSelectionLSI = function(x,
     mat = mat,
     clusters = clusters,
     nFeatures = varFeatures,
+    balance = FALSE,
     # totalFeatures = totalFeatures,
     scaleTo = scaleTo
   )

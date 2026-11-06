@@ -34,15 +34,14 @@ findTopFeatures = function(mat,filterQuantile=0.995,varFeatures=25000,totalFeatu
   return(rownames(mat)[rownames(mat) %in% selected])
 }
 
-#' Select features based on across cell accessibility
+#' Select features based on across cell accessibility and modality
 #' 
-#' @param mat           a sparse matrix (dgCMatrix) of features x cells
+#' @param featureTotals  counts per feature across cells
 #' @param filterQuantile numeric value between 0 and 1; the quantile
 #'                       of features to keep
 #' @param varFeatures    integer; the number of features to return after filtering
 #' @param totalFeatures  integer; the total number of features in the matrix
 #' @return               character vector of feature names
-#' 
 selectBalancedFeatures = function(featureTotals,filterQuantile=0.995,varFeatures=25000,totalFeatures=500000){
   #this needs to go to minimum number of features available across all 3 modalities or at least warn that number of features are inherently unbalanced
   stopifnot(
@@ -67,6 +66,14 @@ selectBalancedFeatures = function(featureTotals,filterQuantile=0.995,varFeatures
   return(unlist(selectedList,use.names = F))
 }
 
+#' Select features based on across cell accessibility and modality
+#' 
+#' @param featureTotals  counts per feature across cells
+#' @param filterQuantile numeric value between 0 and 1; the quantile
+#'                       of features to keep
+#' @param varFeatures    integer; the number of features to return after filtering
+#' @param totalFeatures  integer; the total number of features in the matrix
+#' @return               character vector of feature names
 selectTopFeatures = function(featureTotals,filterQuantile=0.995,varFeatures=25000,totalFeatures=500000){
   origRowNames = names(featureTotals)
   ranked <- order(featureTotals, decreasing = TRUE)

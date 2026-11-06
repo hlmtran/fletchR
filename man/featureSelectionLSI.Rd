@@ -23,7 +23,8 @@ featureSelectionLSI(
   method = "SVD",
   multimodal = FALSE,
   scaleMethod = "Frobenius",
-  balanceFirstSelection = T,
+  balanceFirstSelection = FALSE,
+  balanceIterativeSelection = FALSE,
   seed = 1,
   ...
 )
@@ -64,6 +65,10 @@ featureSelectionLSI(
 \item{multimodal}{Logical indicating multimodal data.}
 
 \item{scaleMethod}{Modality scaling method ("Frobenius" or "minMax").}
+
+\item{balanceFirstSelection}{Logical to balance Features in first pass of feature selection}
+
+\item{balanceIterativeSelection}{Logical to balance Features in iterative pass of feature selection}
 
 \item{seed}{random seed (1)}
 }

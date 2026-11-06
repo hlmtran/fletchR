@@ -2,7 +2,7 @@
 % Please edit documentation in R/findTopFeatures.R
 \name{selectBalancedFeatures}
 \alias{selectBalancedFeatures}
-\title{Select features based on across cell accessibility}
+\title{Select features based on across cell accessibility and modality}
 \usage{
 selectBalancedFeatures(
   featureTotals,
@@ -12,19 +12,19 @@ selectBalancedFeatures(
 )
 }
 \arguments{
+\item{featureTotals}{counts per feature across cells}
+
 \item{filterQuantile}{numeric value between 0 and 1; the quantile
 of features to keep}
 
 \item{varFeatures}{integer; the number of features to return after filtering}
 
 \item{totalFeatures}{integer; the total number of features in the matrix}
-
-\item{mat}{a sparse matrix (dgCMatrix) of features x cells}
 }
 \value{
 \if{html}{\out{<div class="sourceCode">}}\preformatted{          character vector of feature names
 }\if{html}{\out{</div>}}
 }
 \description{
-Select features based on across cell accessibility
+Select features based on across cell accessibility and modality
 }

@@ -20,7 +20,7 @@
   method = "SVD",
   multimodal = FALSE,
   scaleMethod = "Frobenius",
-  balance = T,
+  balance = FALSE,
   seed = 1,
   ...
 )

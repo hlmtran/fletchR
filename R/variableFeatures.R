@@ -9,9 +9,9 @@
 #' @return          a sparse matrix (dgCMatrix) of the top variable features x cells
 #' 
 #' @import sparseMatrixStats
-findVariableFeaturesByCluster <- function(mat , clusters, nFeatures = 25000, scaleTo = 10000, method = "var") {
+findVariableFeaturesByCluster <- function(mat , clusters, nFeatures = 25000, scaleTo = 10000, method = "var",balance = FALSE) {
   stopifnot(inherits(mat, "Matrix"))
-  
+  #the comments indicates this can be refactored further
   
   # 1. Fast Pseudobulking via Sparse Matrix Multiplication
   cluster_factor <- as.factor(clusters)
@@ -41,9 +41,54 @@ findVariableFeaturesByCluster <- function(mat , clusters, nFeatures = 25000, sca
   }
   
   # 4. Select Top Features
-  ranked_idx <- order(vars, decreasing = TRUE)
-  top_idx <- head(ranked_idx, nFeatures)
   
+  if(balance){
+    top_idx = balanceTopVarFeatures(vars = vars, nFeatures = nFeatures)
+  } else {
+    top_idx = topVarFeatures(vars = vars, nFeatures = nFeatures)
+  }
   # Return the subsetted sparse matrix with only the highly variable features
   return(rownames(mat)[sort(top_idx)])
 }
+
+#Extracted from ArchR
+#' get top variable features from each modality
+#' 
+#' @param vars      Vector of row variances
+#' @param nFeatures the number of variable features to return
+#' @return          Indices of top variable features
+balanceTopVarFeatures = function(vars,nFeatures){
+  
+  stopifnot(
+    "Feature names must end with a valid modality suffix (_m<modality>)." =
+      all(grepl("_m[^_]+$", names(vars)))
+  )
+  
+  modalities = getModality(names(vars))
+  nModality = length(unique(modalities))
+  
+  ranked_idx = order(vars, decreasing = TRUE)
+  rankedVars = split(ranked_idx, modalities[ranked_idx])
+  
+  topIdx = lapply(rankedVars, head, floor(nFeatures / nModality))
+  
+  if (length(unique(lengths(topIdx))) > 1) {
+    warning("Unequal numbers of features selected across modalities.")
+  } 
+  
+  return(unlist(topIdx, use.names = FALSE))
+}
+
+#Extracted from ArchR
+#' get top variable features
+#' 
+#' @param vars      Vector of row variances
+#' @param nFeatures the number of variable features to return
+#' @return          Indices of top variable features
+topVarFeatures = function(vars,nFeatures){
+  
+  ranked_idx <- order(vars, decreasing = TRUE)
+  top_idx <- head(ranked_idx, nFeatures)
+  
+  return(top_idx)
+  }
