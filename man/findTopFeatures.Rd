@@ -8,7 +8,8 @@ findTopFeatures(
   mat,
   filterQuantile = 0.995,
   varFeatures = 25000,
-  totalFeatures = 5e+05
+  totalFeatures = 5e+05,
+  balance = F
 )
 }
 \arguments{

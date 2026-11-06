@@ -9,7 +9,8 @@ findVariableFeaturesByCluster(
   clusters,
   nFeatures = 25000,
   scaleTo = 10000,
-  method = "var"
+  method = "var",
+  balance = FALSE
 )
 }
 \arguments{

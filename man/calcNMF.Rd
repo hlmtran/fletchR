@@ -4,7 +4,7 @@
 \alias{calcNMF}
 \title{Core computational engine: Compute NMF on a matrix}
 \usage{
-calcNMF(mat, nDimensions = 30, outliers = NULL, seed = 1)
+calcNMF(mat, nDimensions = 30, outliers = NULL, seed = 1, ...)
 }
 \arguments{
 \item{mat}{Feature-by-cell matrix (e.g. TF-IDF).}
